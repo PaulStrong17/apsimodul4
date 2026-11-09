@@ -51,8 +51,27 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  transaksi: 'transaksi',
-  users: 'users'
+  admin: 'admin',
+  bahan_baku: 'bahan_baku',
+  detail_resep: 'detail_resep',
+  hasil_pemeriksaan_qc: 'hasil_pemeriksaan_qc',
+  hasil_produksi: 'hasil_produksi',
+  hasil_qc_hasil_produksi: 'hasil_qc_hasil_produksi',
+  jadwal_pemeriksaan_qc: 'jadwal_pemeriksaan_qc',
+  jadwal_produksi: 'jadwal_produksi',
+  jenis_supplier: 'jenis_supplier',
+  karyawan_produksi: 'karyawan_produksi',
+  karyawan_qc: 'karyawan_qc',
+  laporan: 'laporan',
+  laporan_jenis: 'laporan_jenis',
+  nama_supplier: 'nama_supplier',
+  owner: 'owner',
+  penerimaan_bahan_baku: 'penerimaan_bahan_baku',
+  pengguna: 'pengguna',
+  permintaan_produk: 'permintaan_produk',
+  produk: 'produk',
+  resep: 'resep',
+  tindakan_perbaikan: 'tindakan_perbaikan'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -71,26 +90,248 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const TransaksiScalarFieldEnum = {
-  id_transaksi: 'id_transaksi',
-  id_user: 'id_user',
-  nama_barang: 'nama_barang',
-  jumlah: 'jumlah',
-  harga_satuan: 'harga_satuan',
-  tanggal: 'tanggal'
+export const AdminScalarFieldEnum = {
+  id_admin: 'id_admin',
+  id_pengguna: 'id_pengguna'
 } as const
 
-export type TransaksiScalarFieldEnum = (typeof TransaksiScalarFieldEnum)[keyof typeof TransaksiScalarFieldEnum]
+export type AdminScalarFieldEnum = (typeof AdminScalarFieldEnum)[keyof typeof AdminScalarFieldEnum]
 
 
-export const UsersScalarFieldEnum = {
-  id_user: 'id_user',
-  nama: 'nama',
+export const Bahan_bakuScalarFieldEnum = {
+  id_bahan: 'id_bahan',
+  nama_bahan: 'nama_bahan',
+  satuan: 'satuan',
+  stok: 'stok',
+  stok_minimum: 'stok_minimum',
+  id_admin: 'id_admin'
+} as const
+
+export type Bahan_bakuScalarFieldEnum = (typeof Bahan_bakuScalarFieldEnum)[keyof typeof Bahan_bakuScalarFieldEnum]
+
+
+export const Detail_resepScalarFieldEnum = {
+  id_detailresep: 'id_detailresep',
+  id_resep: 'id_resep',
+  id_bahan: 'id_bahan'
+} as const
+
+export type Detail_resepScalarFieldEnum = (typeof Detail_resepScalarFieldEnum)[keyof typeof Detail_resepScalarFieldEnum]
+
+
+export const Hasil_pemeriksaan_qcScalarFieldEnum = {
+  id_hasilqc: 'id_hasilqc',
+  tanggal_pencatatan: 'tanggal_pencatatan',
+  jumlah_diperiksa: 'jumlah_diperiksa',
+  jumlah_lolos: 'jumlah_lolos',
+  jumlah_reject: 'jumlah_reject',
+  keterangan: 'keterangan',
+  id_jadwalqc: 'id_jadwalqc',
+  id_karyawanqc: 'id_karyawanqc',
+  id_laporan: 'id_laporan',
+  jenis_laporan: 'jenis_laporan'
+} as const
+
+export type Hasil_pemeriksaan_qcScalarFieldEnum = (typeof Hasil_pemeriksaan_qcScalarFieldEnum)[keyof typeof Hasil_pemeriksaan_qcScalarFieldEnum]
+
+
+export const Hasil_produksiScalarFieldEnum = {
+  id_hasil: 'id_hasil',
+  tanggal_pencatatan: 'tanggal_pencatatan',
+  jumlah_hasil: 'jumlah_hasil',
+  keterangan: 'keterangan',
+  id_jadwalproduksi: 'id_jadwalproduksi',
+  id_karyawanproduksi: 'id_karyawanproduksi'
+} as const
+
+export type Hasil_produksiScalarFieldEnum = (typeof Hasil_produksiScalarFieldEnum)[keyof typeof Hasil_produksiScalarFieldEnum]
+
+
+export const Hasil_qc_hasil_produksiScalarFieldEnum = {
+  id_hasilqc: 'id_hasilqc',
+  id_hasil: 'id_hasil'
+} as const
+
+export type Hasil_qc_hasil_produksiScalarFieldEnum = (typeof Hasil_qc_hasil_produksiScalarFieldEnum)[keyof typeof Hasil_qc_hasil_produksiScalarFieldEnum]
+
+
+export const Jadwal_pemeriksaan_qcScalarFieldEnum = {
+  id_jadwalqc: 'id_jadwalqc',
+  tanggal_pemeriksaan: 'tanggal_pemeriksaan',
+  jenis_pemeriksaan: 'jenis_pemeriksaan',
+  status_verifikasi: 'status_verifikasi',
+  status_pemeriksaan: 'status_pemeriksaan',
+  id_jadwalproduksi: 'id_jadwalproduksi',
+  id_admin: 'id_admin',
+  id_owner: 'id_owner',
+  id_karyawanqc: 'id_karyawanqc',
+  id_karyawanproduksi: 'id_karyawanproduksi'
+} as const
+
+export type Jadwal_pemeriksaan_qcScalarFieldEnum = (typeof Jadwal_pemeriksaan_qcScalarFieldEnum)[keyof typeof Jadwal_pemeriksaan_qcScalarFieldEnum]
+
+
+export const Jadwal_produksiScalarFieldEnum = {
+  id_jadwalproduksi: 'id_jadwalproduksi',
+  tanggal_produksi: 'tanggal_produksi',
+  jumlah_target: 'jumlah_target',
+  status_verifikasi: 'status_verifikasi',
+  status_jadwal: 'status_jadwal',
+  id_admin: 'id_admin',
+  id_permintaan: 'id_permintaan',
+  id_owner: 'id_owner',
+  id_karyawanqc: 'id_karyawanqc',
+  id_karyawanproduksi: 'id_karyawanproduksi'
+} as const
+
+export type Jadwal_produksiScalarFieldEnum = (typeof Jadwal_produksiScalarFieldEnum)[keyof typeof Jadwal_produksiScalarFieldEnum]
+
+
+export const Jenis_supplierScalarFieldEnum = {
+  id_supplier: 'id_supplier',
+  jenis_supplier: 'jenis_supplier',
+  nama_supplier: 'nama_supplier',
+  id_admin: 'id_admin'
+} as const
+
+export type Jenis_supplierScalarFieldEnum = (typeof Jenis_supplierScalarFieldEnum)[keyof typeof Jenis_supplierScalarFieldEnum]
+
+
+export const Karyawan_produksiScalarFieldEnum = {
+  id_karyawanproduksi: 'id_karyawanproduksi',
+  id_pengguna: 'id_pengguna'
+} as const
+
+export type Karyawan_produksiScalarFieldEnum = (typeof Karyawan_produksiScalarFieldEnum)[keyof typeof Karyawan_produksiScalarFieldEnum]
+
+
+export const Karyawan_qcScalarFieldEnum = {
+  id_karyawanqc: 'id_karyawanqc',
+  id_pengguna: 'id_pengguna'
+} as const
+
+export type Karyawan_qcScalarFieldEnum = (typeof Karyawan_qcScalarFieldEnum)[keyof typeof Karyawan_qcScalarFieldEnum]
+
+
+export const LaporanScalarFieldEnum = {
+  id_laporan: 'id_laporan',
+  periode_awal: 'periode_awal',
+  periode_akhir: 'periode_akhir',
+  total_produksi: 'total_produksi',
+  jumlah_pemeriksaan: 'jumlah_pemeriksaan',
+  reject_rate: 'reject_rate',
+  target_reject_rate: 'target_reject_rate',
+  status_pencapaian: 'status_pencapaian',
+  id_admin: 'id_admin',
+  id_owner: 'id_owner'
+} as const
+
+export type LaporanScalarFieldEnum = (typeof LaporanScalarFieldEnum)[keyof typeof LaporanScalarFieldEnum]
+
+
+export const Laporan_jenisScalarFieldEnum = {
+  jenis_laporan: 'jenis_laporan',
+  hasil_tindakanperbaikan: 'hasil_tindakanperbaikan',
+  status_pencapaian: 'status_pencapaian'
+} as const
+
+export type Laporan_jenisScalarFieldEnum = (typeof Laporan_jenisScalarFieldEnum)[keyof typeof Laporan_jenisScalarFieldEnum]
+
+
+export const Nama_supplierScalarFieldEnum = {
+  nama_supplier: 'nama_supplier',
+  no_telp: 'no_telp',
+  alamat: 'alamat'
+} as const
+
+export type Nama_supplierScalarFieldEnum = (typeof Nama_supplierScalarFieldEnum)[keyof typeof Nama_supplierScalarFieldEnum]
+
+
+export const OwnerScalarFieldEnum = {
+  id_owner: 'id_owner',
+  id_pengguna: 'id_pengguna'
+} as const
+
+export type OwnerScalarFieldEnum = (typeof OwnerScalarFieldEnum)[keyof typeof OwnerScalarFieldEnum]
+
+
+export const Penerimaan_bahan_bakuScalarFieldEnum = {
+  id_penerimaan: 'id_penerimaan',
+  tanggal_terima: 'tanggal_terima',
+  jumlah_diterima: 'jumlah_diterima',
+  keterangan_penerimaan: 'keterangan_penerimaan',
+  id_supplier: 'id_supplier',
+  id_bahan: 'id_bahan',
+  id_admin: 'id_admin'
+} as const
+
+export type Penerimaan_bahan_bakuScalarFieldEnum = (typeof Penerimaan_bahan_bakuScalarFieldEnum)[keyof typeof Penerimaan_bahan_bakuScalarFieldEnum]
+
+
+export const PenggunaScalarFieldEnum = {
+  id_pengguna: 'id_pengguna',
+  nama_lengkap: 'nama_lengkap',
   username: 'username',
-  role: 'role'
+  password: 'password',
+  role: 'role',
+  status_aktif: 'status_aktif',
+  email_pengguna: 'email_pengguna'
 } as const
 
-export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
+export type PenggunaScalarFieldEnum = (typeof PenggunaScalarFieldEnum)[keyof typeof PenggunaScalarFieldEnum]
+
+
+export const Permintaan_produkScalarFieldEnum = {
+  id_permintaan: 'id_permintaan',
+  tanggal_permintaan: 'tanggal_permintaan',
+  jumlah_diminta: 'jumlah_diminta',
+  keterangan_permintaan: 'keterangan_permintaan',
+  status_permintaan: 'status_permintaan',
+  id_produk: 'id_produk',
+  id_admin: 'id_admin'
+} as const
+
+export type Permintaan_produkScalarFieldEnum = (typeof Permintaan_produkScalarFieldEnum)[keyof typeof Permintaan_produkScalarFieldEnum]
+
+
+export const ProdukScalarFieldEnum = {
+  id_produk: 'id_produk',
+  nama_produk: 'nama_produk',
+  varian: 'varian',
+  stok_produk: 'stok_produk',
+  resep_produk: 'resep_produk',
+  id_admin: 'id_admin'
+} as const
+
+export type ProdukScalarFieldEnum = (typeof ProdukScalarFieldEnum)[keyof typeof ProdukScalarFieldEnum]
+
+
+export const ResepScalarFieldEnum = {
+  id_resep: 'id_resep',
+  deskripsi_resep: 'deskripsi_resep',
+  id_produk: 'id_produk',
+  id_admin: 'id_admin'
+} as const
+
+export type ResepScalarFieldEnum = (typeof ResepScalarFieldEnum)[keyof typeof ResepScalarFieldEnum]
+
+
+export const Tindakan_perbaikanScalarFieldEnum = {
+  id_tindakan: 'id_tindakan',
+  deskripsi_tindakan: 'deskripsi_tindakan',
+  tanggal_tindakan: 'tanggal_tindakan',
+  status: 'status',
+  keterangan: 'keterangan',
+  hasil_tindakan: 'hasil_tindakan',
+  id_hasilqc: 'id_hasilqc',
+  id_owner: 'id_owner',
+  id_laporan: 'id_laporan',
+  jenis_laporan: 'jenis_laporan',
+  id_karyawanqc: 'id_karyawanqc',
+  id_karyawanproduksi: 'id_karyawanproduksi'
+} as const
+
+export type Tindakan_perbaikanScalarFieldEnum = (typeof Tindakan_perbaikanScalarFieldEnum)[keyof typeof Tindakan_perbaikanScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -107,4 +348,12 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

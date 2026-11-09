@@ -31,8 +31,8 @@ export * from "./enums"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Transaksis
- * const transaksis = await prisma.transaksi.findMany()
+ * // Fetch zero or more Admins
+ * const admins = await prisma.admin.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -42,12 +42,107 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 /**
- * Model transaksi
- * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
- */
-export type transaksi = Prisma.transaksiModel
-/**
- * Model users
+ * Model admin
  * 
  */
-export type users = Prisma.usersModel
+export type admin = Prisma.adminModel
+/**
+ * Model bahan_baku
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type bahan_baku = Prisma.bahan_bakuModel
+/**
+ * Model detail_resep
+ * 
+ */
+export type detail_resep = Prisma.detail_resepModel
+/**
+ * Model hasil_pemeriksaan_qc
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type hasil_pemeriksaan_qc = Prisma.hasil_pemeriksaan_qcModel
+/**
+ * Model hasil_produksi
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type hasil_produksi = Prisma.hasil_produksiModel
+/**
+ * Model hasil_qc_hasil_produksi
+ * 
+ */
+export type hasil_qc_hasil_produksi = Prisma.hasil_qc_hasil_produksiModel
+/**
+ * Model jadwal_pemeriksaan_qc
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type jadwal_pemeriksaan_qc = Prisma.jadwal_pemeriksaan_qcModel
+/**
+ * Model jadwal_produksi
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type jadwal_produksi = Prisma.jadwal_produksiModel
+/**
+ * Model jenis_supplier
+ * 
+ */
+export type jenis_supplier = Prisma.jenis_supplierModel
+/**
+ * Model karyawan_produksi
+ * 
+ */
+export type karyawan_produksi = Prisma.karyawan_produksiModel
+/**
+ * Model karyawan_qc
+ * 
+ */
+export type karyawan_qc = Prisma.karyawan_qcModel
+/**
+ * Model laporan
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type laporan = Prisma.laporanModel
+/**
+ * Model laporan_jenis
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type laporan_jenis = Prisma.laporan_jenisModel
+/**
+ * Model nama_supplier
+ * 
+ */
+export type nama_supplier = Prisma.nama_supplierModel
+/**
+ * Model owner
+ * 
+ */
+export type owner = Prisma.ownerModel
+/**
+ * Model penerimaan_bahan_baku
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type penerimaan_bahan_baku = Prisma.penerimaan_bahan_bakuModel
+/**
+ * Model pengguna
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type pengguna = Prisma.penggunaModel
+/**
+ * Model permintaan_produk
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type permintaan_produk = Prisma.permintaan_produkModel
+/**
+ * Model produk
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type produk = Prisma.produkModel
+/**
+ * Model resep
+ * 
+ */
+export type resep = Prisma.resepModel
+/**
+ * Model tindakan_perbaikan
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type tindakan_perbaikan = Prisma.tindakan_perbaikanModel
