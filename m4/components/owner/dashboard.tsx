@@ -7,54 +7,34 @@ import {
   formatReportNumber,
   formatRejectRate,
 } from "../laporan/data";
-
-const periods = [
-  {
-    value: "2026-10-01_2026-10-22",
-    label: "01–22 Oktober 2026",
-    production: 8750,
-    inspections: 36,
-    rate: 2.95,
-    target: 3,
-    reports: ["LP-001", "LP-002", "LP-003", "LP-004", "LP-005"],
-  },
-  {
-    value: "2026-10-01_2026-10-15",
-    label: "01–15 Oktober 2026",
-    production: 6200,
-    inspections: 24,
-    rate: 2.1,
-    target: 3,
-    reports: ["LP-001", "LP-002"],
-  },
-  {
-    value: "2026-10-16_2026-10-22",
-    label: "16–22 Oktober 2026",
-    production: 2800,
-    inspections: 12,
-    rate: 2.6,
-    target: 3,
-    reports: ["LP-003", "LP-004"],
-  },
-];
-
-const rejectRates = [
-  { code: "LP-001", label: "01–15 Okt", value: 2.1 },
-  { code: "LP-002", label: "01–15 Okt", value: 3.4 },
-  { code: "LP-003", label: "16–22 Okt", value: 1.9 },
-  { code: "LP-004", label: "16–22 Okt", value: 2.6 },
-  { code: "LP-005", label: "01–22 Okt", value: 2.95 },
-];
+import type {
+  OwnerDashboardPeriod,
+  OwnerRejectRateItem,
+} from "@/lib/owner/reports";
 
 export function OwnerDashboard({
-  selectedPeriod = periods[0].value,
+  selectedPeriod,
+  periods = [],
+  rejectRates = [],
 }: {
   selectedPeriod?: string;
+  periods?: OwnerDashboardPeriod[];
+  rejectRates?: OwnerRejectRateItem[];
 }) {
   const current =
-    periods.find((period) => period.value === selectedPeriod) ?? periods[0];
+    periods.find((period) => period.value === selectedPeriod) ??
+    periods[0] ?? {
+      value: "all",
+      label: "Tidak ada periode",
+      production: 0,
+      inspections: 0,
+      rate: 0,
+      target: 3,
+      reports: [],
+    };
+
   const achieved = current.rate <= current.target;
-  const chartMaximum = 4;
+  const chartMaximum = 5;
 
   return (
     <div className="relative z-10 flex flex-1 flex-col gap-5 p-[clamp(20px,2.5vw,36px)]">
@@ -83,7 +63,7 @@ export function OwnerDashboard({
         <KpiCard
           label="Total Produksi"
           value={`${formatReportNumber(current.production)} pcs`}
-          note={`LP-005 · ${current.label}`}
+          note={current.label}
         />
         <KpiCard
           label="Jumlah Pemeriksaan"
@@ -97,7 +77,7 @@ export function OwnerDashboard({
         />
         <KpiCard
           label="Status Pencapaian"
-          value={achieved ? "Tercapai" : "Tidak Tercapai"}
+          value={achieved ? "Tercapai" : "Belum tercapai"}
           note={achieved ? "Reject rate di bawah target" : "Reject rate di atas target"}
           valueClassName={achieved ? "text-[#16834b]" : "text-[#b82926]"}
         />
@@ -120,39 +100,45 @@ export function OwnerDashboard({
           </div>
         </div>
         <div className="mt-6 flex h-[240px] items-end gap-3 overflow-x-auto px-2 pb-2 sm:gap-6">
-          {rejectRates
-            .filter((report) => current.reports.includes(report.code))
-            .map((report) => {
-              const overTarget = report.value > current.target;
-              const barHeight = Math.max(
-                24,
-                (report.value / chartMaximum) * 170,
-              );
+          {rejectRates.length === 0 ? (
+            <div className="flex h-full w-full items-center justify-center text-[14px] text-[#61738a]">
+              Belum ada data laporan untuk grafik KPI.
+            </div>
+          ) : (
+            rejectRates
+              .filter((report) => current.reports.includes(report.code))
+              .map((report) => {
+                const overTarget = report.value > current.target;
+                const barHeight = Math.max(
+                  24,
+                  (report.value / chartMaximum) * 170,
+                );
 
-              return (
-                <div
-                  key={report.code}
-                  className="flex h-full min-w-[58px] flex-1 flex-col items-center justify-end"
-                >
-                  <span className="mb-1 text-[12px] font-bold text-[#17263b]">
-                    {formatRejectRate(report.value)}
-                  </span>
+                return (
                   <div
-                    aria-label={`${report.code}: ${formatRejectRate(report.value)}`}
-                    className={`w-full max-w-[66px] rounded-t-[6px] ${
-                      overTarget ? "bg-[#b82926]" : "bg-[#0a3d62]"
-                    }`}
-                    style={{ height: `${barHeight}px` }}
-                  />
-                  <span className="mt-1 text-[12px] font-bold text-[#17263b]">
-                    {report.code}
-                  </span>
-                  <span className="mt-1 whitespace-nowrap text-[11px] text-[#61738a]">
-                    {report.label}
-                  </span>
-                </div>
-              );
-            })}
+                    key={report.code}
+                    className="flex h-full min-w-[58px] flex-1 flex-col items-center justify-end"
+                  >
+                    <span className="mb-1 text-[12px] font-bold text-[#17263b]">
+                      {formatRejectRate(report.value)}
+                    </span>
+                    <div
+                      aria-label={`${report.code}: ${formatRejectRate(report.value)}`}
+                      className={`w-full max-w-[66px] rounded-t-[6px] ${
+                        overTarget ? "bg-[#b82926]" : "bg-[#0a3d62]"
+                      }`}
+                      style={{ height: `${barHeight}px` }}
+                    />
+                    <span className="mt-1 text-[12px] font-bold text-[#17263b]">
+                      {report.code}
+                    </span>
+                    <span className="mt-1 whitespace-nowrap text-[11px] text-[#61738a]">
+                      {report.label}
+                    </span>
+                  </div>
+                );
+              })
+          )}
         </div>
       </section>
       <Link
@@ -187,9 +173,13 @@ function KpiCard({
   );
 }
 
-export function OwnerPeriodPicker() {
+export function OwnerPeriodPicker({
+  periods = [],
+}: {
+  periods?: OwnerDashboardPeriod[];
+}) {
   const router = useRouter();
-  const [period, setPeriod] = useState("");
+  const [period, setPeriod] = useState(periods[0]?.value ?? "");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -204,8 +194,7 @@ export function OwnerPeriodPicker() {
           Dashboard KPI
         </h1>
         <p className="mt-1 text-[14px] text-[#61738a] md:text-[17px]">
-          Ringkasan capaian produksi dan mutu berdasarkan rekap laporan, 01–22
-          Oktober 2026.
+          Pilih periode laporan untuk menampilkan ringkasan capaian produksi dan mutu.
         </p>
       </div>
       <form

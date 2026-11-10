@@ -1,27 +1,21 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
 import { QualityDetail } from "../../../../components/jadwal-qc/quality-detail";
-import { getQualitySchedule } from "../../../../components/jadwal-qc/data";
 import { QualityPageHeading } from "../../../../components/jadwal-qc/page-heading";
+import { requireAdminPage } from "../../../../lib/admin/authorization";
+import { getAdminQcSchedule } from "../../../../lib/admin/qc-schedules";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
 };
 
-export default function LihatDetailJadwalQcPage({ params }: PageProps) {
-  return (
-    <Suspense
-      fallback={<div className="min-h-svh bg-[#f6f9fc]" aria-busy="true" />}
-    >
-      <LihatDetailJadwalQcContent params={params} />
-    </Suspense>
-  );
-}
-
-async function LihatDetailJadwalQcContent({ params }: PageProps) {
+export default async function LihatDetailJadwalQcPage({ params }: PageProps) {
   const { kode } = await params;
-  const schedule = getQualitySchedule(kode);
+  const admin = await requireAdminPage();
+  const schedule = await getAdminQcSchedule(
+    admin.id_admin,
+    decodeURIComponent(kode),
+  );
 
   if (!schedule) notFound();
 

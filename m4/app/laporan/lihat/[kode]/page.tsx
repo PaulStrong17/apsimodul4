@@ -1,27 +1,18 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
-import { getReport } from "../../../../components/laporan/data";
 import { ReportDetail } from "../../../../components/laporan/report-detail";
 import { ReportPageHeading } from "../../../../components/laporan/page-heading";
+import { requireAdminPage } from "../../../../lib/admin/authorization";
+import { getAdminReport } from "../../../../lib/admin/reports";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
 };
 
-export default function LihatDetailLaporanPage({ params }: PageProps) {
-  return (
-    <Suspense
-      fallback={<div className="min-h-svh bg-[#f6f9fc]" aria-busy="true" />}
-    >
-      <LihatDetailLaporanContent params={params} />
-    </Suspense>
-  );
-}
-
-async function LihatDetailLaporanContent({ params }: PageProps) {
+export default async function LihatDetailLaporanPage({ params }: PageProps) {
   const { kode } = await params;
-  const report = getReport(kode);
+  const admin = await requireAdminPage();
+  const report = await getAdminReport(admin.id_admin, decodeURIComponent(kode));
 
   if (!report) notFound();
 

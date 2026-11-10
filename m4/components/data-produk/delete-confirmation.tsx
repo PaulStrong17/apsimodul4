@@ -1,11 +1,46 @@
+"use client";
+
 import Link from "next/link";
-import type { Product } from "./data";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { AdminProduct } from "./data";
 
 export function ProductDeleteConfirmation({
   product,
 }: {
-  product: Product;
+  product: AdminProduct;
 }) {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function deleteProduct() {
+    setError(null);
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(
+        `/api/admin/produk/${encodeURIComponent(product.code)}`,
+        { method: "DELETE" },
+      );
+      const result: { error?: string } = await response.json();
+
+      if (!response.ok) {
+        setError(result.error ?? "Produk tidak dapat dihapus.");
+        return;
+      }
+
+      router.replace(
+        `/data-produk/hapus/berhasil/${encodeURIComponent(product.code)}`,
+      );
+      router.refresh();
+    } catch {
+      setError("Tidak dapat menghubungi server. Coba lagi.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <section
       aria-labelledby="delete-title"
@@ -35,13 +70,20 @@ export function ProductDeleteConfirmation({
         >
           Batal
         </Link>
-        <Link
-          href={`/data-produk/hapus/berhasil/${product.code}`}
-          className="inline-flex h-11 items-center justify-center rounded-[9px] bg-[#b82926] px-[18px] text-[15px] font-semibold text-white transition-colors hover:bg-[#9d201e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62] md:text-[17px]"
+        <button
+          type="button"
+          disabled={isDeleting}
+          onClick={deleteProduct}
+          className="inline-flex h-11 items-center justify-center rounded-[9px] bg-[#b82926] px-[18px] text-[15px] font-semibold text-white transition-colors hover:bg-[#9d201e] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b82926] md:text-[17px]"
         >
-          Ya, Hapus
-        </Link>
+          {isDeleting ? "Menghapus..." : "Ya, Hapus"}
+        </button>
       </div>
+      {error ? (
+        <p role="alert" className="mt-4 max-w-[460px] text-sm text-red-700">
+          {error}
+        </p>
+      ) : null}
     </section>
   );
 }

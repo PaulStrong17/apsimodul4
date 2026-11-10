@@ -1,27 +1,21 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../../components/bahan-baku/page-shell";
-import { getReport } from "../../../../../components/laporan/data";
 import { ReportDeleteConfirmation } from "../../../../../components/laporan/report-delete-confirmation";
 import { ReportPageHeading } from "../../../../../components/laporan/page-heading";
+import { requireAdminPage } from "../../../../../lib/admin/authorization";
+import { getAdminReport } from "../../../../../lib/admin/reports";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
 };
 
-export default function KonfirmasiHapusLaporanPage({ params }: PageProps) {
-  return (
-    <Suspense
-      fallback={<div className="min-h-svh bg-[#f6f9fc]" aria-busy="true" />}
-    >
-      <KonfirmasiHapusLaporanContent params={params} />
-    </Suspense>
-  );
-}
-
-async function KonfirmasiHapusLaporanContent({ params }: PageProps) {
+export default async function KonfirmasiHapusLaporanPage({ params }: PageProps) {
   const { kode } = await params;
-  const report = getReport(kode);
+  const admin = await requireAdminPage();
+  const report = await getAdminReport(
+    admin.id_admin,
+    decodeURIComponent(kode),
+  );
 
   if (!report) notFound();
 
@@ -37,7 +31,7 @@ async function KonfirmasiHapusLaporanContent({ params }: PageProps) {
           description="Tindakan ini perlu konfirmasi."
         />
         <div className="relative z-10 flex flex-1 items-center justify-center py-8">
-          <ReportDeleteConfirmation code={report.code} />
+          <ReportDeleteConfirmation code={report.code} type={report.type} />
         </div>
       </div>
     </BahanBakuPageShell>

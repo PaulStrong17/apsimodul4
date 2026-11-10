@@ -2,15 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   formatProductionDate,
-  getProductRequestLabel,
-  productionSchedules,
 } from "./data";
+import type { AdminProductionSchedule } from "../../lib/admin/schedules";
 
 type ScheduleTableProps = {
   mode: "view" | "update" | "delete";
+  schedules: AdminProductionSchedule[];
 };
 
-export function ScheduleTable({ mode }: ScheduleTableProps) {
+export function ScheduleTable({ mode, schedules }: ScheduleTableProps) {
   const actionHeading = mode === "delete" ? "Hapus" : "Aksi";
 
   return (
@@ -46,7 +46,7 @@ export function ScheduleTable({ mode }: ScheduleTableProps) {
             </tr>
           </thead>
           <tbody>
-            {productionSchedules.map((schedule) => (
+            {schedules.map((schedule) => (
               <tr
                 key={schedule.code}
                 className="h-[68px] border-t border-[#d6e3ed] align-middle"
@@ -56,7 +56,7 @@ export function ScheduleTable({ mode }: ScheduleTableProps) {
                   {formatProductionDate(schedule.productionDate)}
                 </td>
                 <td className="px-4 py-3">
-                  {getProductRequestLabel(schedule)}
+                  {schedule.requestLabel}
                 </td>
                 <td className="px-4 py-3">{schedule.target} pcs</td>
                 <td className="px-4 py-3">{schedule.productionEmployee}</td>
@@ -64,7 +64,7 @@ export function ScheduleTable({ mode }: ScheduleTableProps) {
                 <td className="px-4 py-3">
                   {mode === "delete" ? (
                     <Link
-                      href={`/jadwal-produksi/hapus/konfirmasi/${schedule.code}`}
+                      href={`/jadwal-produksi/hapus/konfirmasi/${encodeURIComponent(schedule.code)}`}
                       aria-label={`Hapus jadwal ${schedule.code}`}
                       className="inline-flex h-11 w-[52px] items-center justify-center rounded-[9px] bg-[#c9302c]/85 transition-colors hover:bg-[#a72522] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b82926]"
                     >
@@ -80,8 +80,8 @@ export function ScheduleTable({ mode }: ScheduleTableProps) {
                     <Link
                       href={
                         mode === "update"
-                          ? `/jadwal-produksi/update/${schedule.code}`
-                          : `/jadwal-produksi/lihat/${schedule.code}`
+                          ? `/jadwal-produksi/update/${encodeURIComponent(schedule.code)}`
+                          : `/jadwal-produksi/lihat/${encodeURIComponent(schedule.code)}`
                       }
                       className="inline-flex h-11 items-center justify-center gap-2 rounded-[9px] border border-[#d6e3ed] bg-white/70 px-[14px] font-bold text-[#0a3d62] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62]"
                     >
@@ -101,12 +101,22 @@ export function ScheduleTable({ mode }: ScheduleTableProps) {
                 </td>
               </tr>
             ))}
+            {schedules.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="border-t border-[#d6e3ed] px-4 py-8 text-center text-[#61738a]"
+                >
+                  Belum ada jadwal produksi.
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>
       <div className="flex min-h-[62px] items-center justify-between border-t border-[#d6e3ed] px-6 text-[14px] text-[#61738a]">
-        <p>Menampilkan 1–5 dari 5 jadwal produksi</p>
-        <p className="text-[#0a3d62]">Halaman 1 dari 1</p>
+        <p>Menampilkan {schedules.length} jadwal produksi</p>
+        <p className="text-[#0a3d62]">Data Jadwal Produksi Admin</p>
       </div>
     </section>
   );

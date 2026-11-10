@@ -2,17 +2,16 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { FormEvent, ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { Button } from "../ui/button";
 import {
-  formatShortInspectionDate,
   inspectionStatuses,
-  inspectionTypes,
   inspectionVerificationStatuses,
-  qualityControlEmployees,
-  type QualitySchedule,
 } from "./data";
-import { productionSchedules } from "../jadwal-produksi/data";
+import type {
+  AdminQcSchedule,
+  AdminQcScheduleOptions,
+} from "../../lib/admin/qc-schedules";
 
 const fieldClassName =
   "h-12 w-full rounded-[9px] border border-[#d9e3ed] bg-white px-[10px] text-[14px] leading-normal text-[#17263b] outline-none placeholder:text-[#8c99a8] focus:border-[#0a3d62] focus:ring-2 focus:ring-[#0a3d62]/10 md:text-[16px]";
@@ -43,16 +42,14 @@ function SelectField({
   id,
   name,
   placeholder,
-  values,
+  options,
   defaultValue,
-  labels,
 }: {
   id: string;
   name: string;
   placeholder: string;
-  values: string[];
+  options: { id: string; label: string }[];
   defaultValue?: string;
-  labels?: Record<string, string>;
 }) {
   return (
     <span className="relative block">
@@ -68,9 +65,9 @@ function SelectField({
         <option value="" disabled>
           {placeholder}
         </option>
-        {values.map((value) => (
-          <option key={value} value={value}>
-            {labels?.[value] ?? value}
+        {options.map((opt) => (
+          <option key={opt.id} value={opt.id}>
+            {opt.label}
           </option>
         ))}
       </select>
@@ -86,42 +83,103 @@ function SelectField({
   );
 }
 
+function SimpleSelectField({
+  id,
+  name,
+  placeholder,
+  values,
+  defaultValue,
+}: {
+  id: string;
+  name: string;
+  placeholder: string;
+  values: string[];
+  defaultValue?: string;
+}) {
+  return (
+    <SelectField
+      id={id}
+      name={name}
+      placeholder={placeholder}
+      options={values.map((v) => ({ id: v, label: v }))}
+      defaultValue={defaultValue}
+    />
+  );
+}
+
 export function QualityForm({
   mode,
   schedule,
+  options,
 }: {
   mode: "create" | "edit";
-  schedule?: QualitySchedule;
+  schedule?: AdminQcSchedule;
+  options: AdminQcScheduleOptions;
 }) {
   const router = useRouter();
   const isEditing = mode === "edit";
-  const productionScheduleLabels = Object.fromEntries(
-    productionSchedules.map((productionSchedule) => [
-      productionSchedule.code,
-      `${productionSchedule.code} · ${formatShortInspectionDate(
-        productionSchedule.productionDate,
-      )}`,
-    ]),
-  );
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     if (!form.reportValidity()) return;
 
     const formData = new FormData(form);
     const code = isEditing
-      ? schedule?.code
+      ? (schedule?.code ?? "")
       : String(formData.get("kode") ?? "")
           .trim()
           .toUpperCase();
-    if (!code) throw new Error("A QC schedule code is required.");
+    if (!code) {
+      setError("Kode jadwal QC diperlukan.");
+      return;
+    }
 
-    router.push(
-      isEditing
-        ? `/jadwal-qc/update/berhasil/${encodeURIComponent(code)}`
-        : `/jadwal-qc/tambah/berhasil/${encodeURIComponent(code)}`,
-    );
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const body = {
+        code,
+        inspectionDate: formData.get("tanggalPemeriksaan"),
+        type: formData.get("jenisPemeriksaan"),
+        productionScheduleId: formData.get("jadwalProduksi"),
+        qualityControlEmployeeId: formData.get("karyawanQc"),
+        productionEmployeeId: formData.get("karyawanProduksi"),
+        ownerId: formData.get("owner"),
+        status: formData.get("statusPemeriksaan"),
+        verificationStatus: formData.get("statusVerifikasi"),
+      };
+
+      const url = isEditing
+        ? `/api/admin/jadwal-qc/${encodeURIComponent(code)}`
+        : "/api/admin/jadwal-qc";
+
+      const res = await fetch(url, {
+        method: isEditing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setError(data.error ?? "Terjadi kesalahan saat menyimpan data.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      router.replace(
+        isEditing
+          ? `/jadwal-qc/update/berhasil/${encodeURIComponent(code)}`
+          : `/jadwal-qc/tambah/berhasil/${encodeURIComponent(code)}`,
+      );
+      router.refresh();
+    } catch {
+      setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -138,6 +196,15 @@ export function QualityForm({
             : "Lengkapi informasi jadwal pemeriksaan QC. Kolom wajib ditandai dengan *."}
         </p>
 
+        {error && (
+          <div
+            role="alert"
+            className="mt-4 rounded-[9px] border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-700"
+          >
+            {error}
+          </div>
+        )}
+
         <div className="mt-6 grid grid-cols-1 gap-6 md:mt-[26px] md:min-h-[77px] md:grid-cols-2 md:gap-x-6">
           <FormField label="Kode Jadwal QC" htmlFor="kode">
             <input
@@ -145,7 +212,7 @@ export function QualityForm({
               name="kode"
               type="text"
               autoComplete="off"
-              placeholder="Contoh: JQ-006"
+              placeholder="Contoh: JQ006"
               defaultValue={schedule?.code}
               readOnly={isEditing}
               required
@@ -166,12 +233,15 @@ export function QualityForm({
 
         <div className="mt-6 grid grid-cols-1 gap-6 md:mt-6 md:min-h-[262px] md:grid-cols-2 md:gap-x-6">
           <FormField label="Jenis Pemeriksaan" htmlFor="jenis-pemeriksaan">
-            <SelectField
+            <input
               id="jenis-pemeriksaan"
               name="jenisPemeriksaan"
-              placeholder="Pilih jenis pemeriksaan"
-              values={inspectionTypes}
+              type="text"
+              autoComplete="off"
+              placeholder="Contoh: Pemeriksaan Bahan Baku"
               defaultValue={schedule?.type}
+              required
+              className={fieldClassName}
             />
           </FormField>
           <FormField label="Jadwal Produksi" htmlFor="jadwal-produksi">
@@ -179,9 +249,8 @@ export function QualityForm({
               id="jadwal-produksi"
               name="jadwalProduksi"
               placeholder="Pilih jadwal produksi"
-              values={productionSchedules.map((item) => item.code)}
+              options={options.productionSchedules}
               defaultValue={schedule?.productionCode}
-              labels={productionScheduleLabels}
             />
           </FormField>
         </div>
@@ -192,8 +261,8 @@ export function QualityForm({
               id="karyawan-qc"
               name="karyawanQc"
               placeholder="Pilih karyawan QC"
-              values={qualityControlEmployees}
-              defaultValue={schedule?.qualityControlEmployee}
+              options={options.qualityControlEmployees}
+              defaultValue={schedule?.qualityControlEmployeeId}
             />
           </FormField>
           <FormField label="Karyawan Produksi" htmlFor="karyawan-produksi">
@@ -201,17 +270,15 @@ export function QualityForm({
               id="karyawan-produksi"
               name="karyawanProduksi"
               placeholder="Pilih karyawan produksi"
-              values={productionSchedules
-                .map((item) => item.productionEmployee)
-                .filter((name, index, names) => names.indexOf(name) === index)}
-              defaultValue={schedule?.productionEmployee}
+              options={options.productionEmployees}
+              defaultValue={schedule?.productionEmployeeId}
             />
           </FormField>
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-6 md:mt-6 md:min-h-[262px] md:grid-cols-2 md:gap-x-6">
           <FormField label="Status Pemeriksaan" htmlFor="status-pemeriksaan">
-            <SelectField
+            <SimpleSelectField
               id="status-pemeriksaan"
               name="statusPemeriksaan"
               placeholder="Pilih status pemeriksaan"
@@ -220,7 +287,7 @@ export function QualityForm({
             />
           </FormField>
           <FormField label="Status Verifikasi" htmlFor="status-verifikasi">
-            <SelectField
+            <SimpleSelectField
               id="status-verifikasi"
               name="statusVerifikasi"
               placeholder="Pilih status verifikasi"
@@ -236,8 +303,8 @@ export function QualityForm({
               id="owner"
               name="owner"
               placeholder="Pilih owner"
-              values={["Onang"]}
-              defaultValue={schedule?.owner}
+              options={options.owners}
+              defaultValue={schedule?.ownerId}
             />
           </FormField>
         </div>
@@ -245,9 +312,14 @@ export function QualityForm({
         <div className="mt-7 flex items-center gap-3 md:mt-auto md:pt-6">
           <Button
             type="submit"
+            disabled={isSubmitting}
             className="h-11 rounded-[9px] px-[18px] text-[15px] md:text-[17px]"
           >
-            {isEditing ? "Simpan Perubahan" : "Simpan"}
+            {isSubmitting
+              ? "Menyimpan..."
+              : isEditing
+                ? "Simpan Perubahan"
+                : "Simpan"}
           </Button>
           <Button
             type="button"

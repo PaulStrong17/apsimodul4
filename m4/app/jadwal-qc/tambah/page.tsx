@@ -1,8 +1,15 @@
 import { BahanBakuPageShell } from "../../../components/bahan-baku/page-shell";
 import { QualityForm } from "../../../components/jadwal-qc/quality-form";
 import { QualityPageHeading } from "../../../components/jadwal-qc/page-heading";
+import { requireAdminPage } from "../../../lib/admin/authorization";
+import { getAdminQcScheduleOptions } from "../../../lib/admin/qc-schedules";
 
-export default function TambahJadwalQcPage() {
+export const instant = false;
+
+export default async function TambahJadwalQcPage() {
+  const admin = await requireAdminPage();
+  const options = await getAdminQcScheduleOptions(admin.id_admin);
+
   return (
     <BahanBakuPageShell
       breadcrumb="Admin / Jadwal QC / Tambah"
@@ -15,7 +22,7 @@ export default function TambahJadwalQcPage() {
           description="Isi informasi jadwal pemeriksaan QC baru sebelum menyimpan data."
         />
         <div className="mt-7 md:mt-[clamp(28px,3.2vw,46px)]">
-          <QualityForm mode="create" />
+          <QualityForm mode="create" options={options} />
         </div>
       </div>
     </BahanBakuPageShell>

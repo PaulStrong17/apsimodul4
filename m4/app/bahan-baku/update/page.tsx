@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { BahanBakuDataTable } from "../../../components/bahan-baku/data-table";
 import { BahanBakuPageShell } from "../../../components/bahan-baku/page-shell";
+import { listAdminMaterials } from "../../../lib/admin/materials";
+import { requireAdminPage } from "../../../lib/admin/authorization";
 
-export default function UpdateBahanBakuPage() {
+export const instant = false;
+
+export default async function UpdateBahanBakuPage() {
+  const admin = await requireAdminPage();
+  const materials = await listAdminMaterials(admin.id_admin);
+
   return (
     <BahanBakuPageShell breadcrumb="Admin / Bahan Baku / Update / Daftar">
       <div className="relative flex flex-1 flex-col gap-6 p-[clamp(20px,2.5vw,36px)]">
@@ -16,7 +23,7 @@ export default function UpdateBahanBakuPage() {
           </p>
         </div>
 
-        <BahanBakuDataTable action="edit" />
+        <BahanBakuDataTable action="edit" materials={materials} />
 
         <Link
           href="/menu-bahan-baku"

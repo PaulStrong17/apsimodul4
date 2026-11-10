@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuEditForm } from "../../../../components/bahan-baku/edit-form";
-import { getBahanBaku } from "../../../../components/bahan-baku/data";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
+import { getAdminMaterial } from "../../../../lib/admin/materials";
+import { requireAdminPage } from "../../../../lib/admin/authorization";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -18,7 +19,8 @@ export default function EditBahanBakuPage({ params }: PageProps) {
 
 async function EditBahanBakuContent({ params }: PageProps) {
   const { kode } = await params;
-  const material = getBahanBaku(kode);
+  const admin = await requireAdminPage();
+  const material = await getAdminMaterial(admin.id_admin, kode);
 
   if (!material) {
     notFound();

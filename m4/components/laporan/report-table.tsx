@@ -1,17 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { AdminReport } from "../../lib/admin/reports";
 import {
   formatReportNumber,
   formatRejectRate,
   formatShortReportPeriod,
-  reports,
 } from "./data";
 
 type ReportTableProps = {
   mode: "view" | "update" | "delete";
+  reports: AdminReport[];
 };
 
-export function ReportTable({ mode }: ReportTableProps) {
+export function ReportTable({ mode, reports }: ReportTableProps) {
   return (
     <section className="relative z-10 mt-7 w-full overflow-hidden rounded-[14px] border border-[#d6e3ed] bg-white">
       <h2 className="px-6 py-[18px] text-[17px] font-bold text-[#17263b] md:text-[20px]">
@@ -45,68 +46,79 @@ export function ReportTable({ mode }: ReportTableProps) {
             </tr>
           </thead>
           <tbody>
-            {reports.map((report) => (
-              <tr
-                key={report.code}
-                className="h-[68px] border-t border-[#d6e3ed] align-middle"
-              >
-                <td className="px-4 py-3 text-[#61738a]">{report.code}</td>
-                <td className="px-4 py-3 font-bold">{report.type}</td>
-                <td className="px-4 py-3">
-                  {formatShortReportPeriod(report)}
-                </td>
-                <td className="px-4 py-3">
-                  {formatReportNumber(report.totalProduction)} pcs
-                </td>
-                <td className="px-4 py-3">
-                  {formatRejectRate(report.rejectRate)}
-                </td>
-                <td className="px-4 py-3">{report.achievement}</td>
-                <td className="px-4 py-3">
-                  {mode === "delete" ? (
-                    <Link
-                      href={`/laporan/hapus/konfirmasi/${report.code}`}
-                      aria-label={`Hapus laporan ${report.code}`}
-                      className="inline-flex h-11 w-[52px] items-center justify-center rounded-[9px] bg-[#b82926] transition-colors hover:bg-[#9d201e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b82926]"
-                    >
-                      <Image
-                        src="/images/bahan-baku/icon-trash.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                        className="brightness-0 invert"
-                      />
-                    </Link>
-                  ) : (
-                    <Link
-                      href={
-                        mode === "update"
-                          ? `/laporan/update/${report.code}`
-                          : `/laporan/lihat/${report.code}`
-                      }
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-[9px] border border-[#d6e3ed] bg-white px-[14px] font-bold text-[#0a3d62] transition-colors hover:bg-[#f6f9fc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62]"
-                    >
-                      <Image
-                        src={
-                          mode === "update"
-                            ? "/images/bahan-baku/icon-edit.svg"
-                            : "/images/bahan-baku/icon-eye.svg"
-                        }
-                        alt=""
-                        width={16}
-                        height={16}
-                      />
-                      {mode === "update" ? "Edit" : "Lihat"}
-                    </Link>
-                  )}
+            {reports.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-6 py-10 text-center text-[#61738a]"
+                >
+                  Belum ada data laporan.
                 </td>
               </tr>
-            ))}
+            ) : (
+              reports.map((report) => (
+                <tr
+                  key={report.code}
+                  className="h-[68px] border-t border-[#d6e3ed] align-middle"
+                >
+                  <td className="px-4 py-3 text-[#61738a]">{report.code}</td>
+                  <td className="px-4 py-3 font-bold">{report.type}</td>
+                  <td className="px-4 py-3">
+                    {formatShortReportPeriod(report)}
+                  </td>
+                  <td className="px-4 py-3">
+                    {formatReportNumber(report.totalProduction)} pcs
+                  </td>
+                  <td className="px-4 py-3">
+                    {formatRejectRate(report.rejectRate)}
+                  </td>
+                  <td className="px-4 py-3">{report.achievement}</td>
+                  <td className="px-4 py-3">
+                    {mode === "delete" ? (
+                      <Link
+                        href={`/laporan/hapus/konfirmasi/${encodeURIComponent(report.code)}`}
+                        aria-label={`Hapus laporan ${report.code}`}
+                        className="inline-flex h-11 w-[52px] items-center justify-center rounded-[9px] bg-[#b82926] transition-colors hover:bg-[#9d201e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b82926]"
+                      >
+                        <Image
+                          src="/images/bahan-baku/icon-trash.svg"
+                          alt=""
+                          width={16}
+                          height={16}
+                          className="brightness-0 invert"
+                        />
+                      </Link>
+                    ) : (
+                      <Link
+                        href={
+                          mode === "update"
+                            ? `/laporan/update/${encodeURIComponent(report.code)}`
+                            : `/laporan/lihat/${encodeURIComponent(report.code)}`
+                        }
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-[9px] border border-[#d6e3ed] bg-white px-[14px] font-bold text-[#0a3d62] transition-colors hover:bg-[#f6f9fc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62]"
+                      >
+                        <Image
+                          src={
+                            mode === "update"
+                              ? "/images/bahan-baku/icon-edit.svg"
+                              : "/images/bahan-baku/icon-eye.svg"
+                          }
+                          alt=""
+                          width={16}
+                          height={16}
+                        />
+                        {mode === "update" ? "Edit" : "Lihat"}
+                      </Link>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
       <div className="flex min-h-[62px] items-center justify-between border-t border-[#d6e3ed] px-6 text-[14px] text-[#61738a]">
-        <p>Menampilkan 1–5 dari 5 laporan</p>
+        <p>Menampilkan {reports.length} laporan</p>
         <p className="text-[#0a3d62]">Halaman 1 dari 1</p>
       </div>
     </section>

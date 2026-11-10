@@ -1,9 +1,6 @@
 import Link from "next/link";
-import {
-  formatProductionDate,
-  getProductRequestLabel,
-  type ProductionSchedule,
-} from "./data";
+import { formatProductionDate } from "./data";
+import type { AdminProductionSchedule } from "../../lib/admin/schedules";
 
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
@@ -19,7 +16,7 @@ function DetailField({ label, value }: { label: string; value: string }) {
 export function ScheduleDetail({
   schedule,
 }: {
-  schedule: ProductionSchedule;
+  schedule: AdminProductionSchedule;
 }) {
   return (
     <section className="relative z-10 w-full max-w-[900px] rounded-[14px] border border-[#d6e3ed] bg-white px-5 py-5 md:px-6 md:py-6">
@@ -33,10 +30,7 @@ export function ScheduleDetail({
           value={formatProductionDate(schedule.productionDate)}
         />
         <DetailField label="Jumlah Target" value={`${schedule.target} pcs`} />
-        <DetailField
-          label="Permintaan Produk"
-          value={getProductRequestLabel(schedule)}
-        />
+        <DetailField label="Permintaan Produk" value={schedule.requestLabel} />
         <DetailField label="Status Jadwal" value={schedule.status} />
         <DetailField
           label="Karyawan Produksi"

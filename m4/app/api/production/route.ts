@@ -1,37 +1,16 @@
-import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
-import { getAuthSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { requireKaryawanProduksiApi } from "@/lib/karyawan-produksi/authorization";
 
 const productionStatuses = ["Direncanakan", "Berjalan", "Selesai"] as const;
 
-async function getProductionEmployee(userId: string) {
-  return prisma.karyawan_produksi.findFirst({
-    where: { id_pengguna: userId },
-    select: { id_karyawanproduksi: true },
-  });
-}
-
 export async function GET() {
-  const session = await getAuthSession();
-  if (!session) {
-    return NextResponse.json({ error: "Silakan masuk terlebih dahulu." }, { status: 401 });
-  }
-  if (session.role !== "karyawan_produksi") {
-    return NextResponse.json({ error: "Akses tidak diizinkan." }, { status: 403 });
-  }
+  const auth = await requireKaryawanProduksiApi();
+  if (auth.error) return auth.error;
 
   try {
-    const employee = await getProductionEmployee(session.userId);
-    if (!employee) {
-      return NextResponse.json(
-        { error: "Akun belum terhubung ke data karyawan produksi." },
-        { status: 403 },
-      );
-    }
-
     const schedules = await prisma.jadwal_produksi.findMany({
-      where: { id_karyawanproduksi: employee.id_karyawanproduksi },
+      where: { id_karyawanproduksi: auth.karyawanProduksiId },
       select: {
         id_jadwalproduksi: true,
         tanggal_produksi: true,
@@ -63,13 +42,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getAuthSession();
-  if (!session) {
-    return NextResponse.json({ error: "Silakan masuk terlebih dahulu." }, { status: 401 });
-  }
-  if (session.role !== "karyawan_produksi") {
-    return NextResponse.json({ error: "Akses tidak diizinkan." }, { status: 403 });
-  }
+  const auth = await requireKaryawanProduksiApi();
+  if (auth.error) return auth.error;
 
   let body: unknown;
   try {
@@ -94,18 +68,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const employee = await getProductionEmployee(session.userId);
-    if (!employee) {
-      return NextResponse.json(
-        { error: "Akun belum terhubung ke data karyawan produksi." },
-        { status: 403 },
-      );
-    }
-
     const schedule = await prisma.jadwal_produksi.findFirst({
       where: {
         id_jadwalproduksi: input.scheduleId,
-        id_karyawanproduksi: employee.id_karyawanproduksi,
+        id_karyawanproduksi: auth.karyawanProduksiId,
       },
       select: { id_jadwalproduksi: true },
     });
@@ -159,14 +125,24 @@ export async function POST(request: Request) {
       );
     }
 
+    const count = await prisma.hasil_produksi.count();
+    let nextId = `HP${String(count + 1).padStart(3, "0")}`;
+    const exists = await prisma.hasil_produksi.findUnique({
+      where: { id_hasil: nextId },
+      select: { id_hasil: true },
+    });
+    if (exists) {
+      nextId = `HP${String(count + 2).padStart(3, "0")}`;
+    }
+
     const result = await prisma.hasil_produksi.create({
       data: {
-        id_hasil: `HP-${randomBytes(6).toString("base64url").slice(0, 7).toUpperCase()}`,
+        id_hasil: nextId,
         tanggal_pencatatan: date,
         jumlah_hasil: amount,
         keterangan: note,
         id_jadwalproduksi: schedule.id_jadwalproduksi,
-        id_karyawanproduksi: employee.id_karyawanproduksi,
+        id_karyawanproduksi: auth.karyawanProduksiId,
       },
       select: { id_hasil: true },
     });

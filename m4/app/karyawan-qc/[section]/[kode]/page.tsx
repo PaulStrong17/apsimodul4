@@ -1,16 +1,19 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { EmployeeQcHeading, EmployeeQcShell } from "../../../../components/karyawan-qc/employee-shell";
-import {
-  getQualityResult,
-  getReferenceRow,
-  getReferenceSection,
-  isKaryawanQcSection,
-} from "../../../../components/karyawan-qc/data";
+import { isKaryawanQcSection } from "../../../../components/karyawan-qc/data";
 import {
   QualityResultDetails,
   ReferenceDetails,
 } from "../../../../components/karyawan-qc/reference-data";
+import { requireKaryawanQcPage } from "../../../../lib/karyawan-qc/authorization";
+import { getQcResult } from "../../../../lib/karyawan-qc/hasil-qc";
+import {
+  getReferenceRowData,
+  getReferenceSectionData,
+} from "../../../../lib/karyawan-qc/reference";
+
+export const instant = false;
 
 type PageProps = {
   params: Promise<{ section: string; kode: string }>;
@@ -26,9 +29,10 @@ export default function KaryawanQcDetailPage({ params }: PageProps) {
 
 async function KaryawanQcDetailContent({ params }: PageProps) {
   const { section, kode } = await params;
+  const karyawan = await requireKaryawanQcPage();
 
   if (section === "hasil-qc") {
-    const result = getQualityResult(kode);
+    const result = await getQcResult(karyawan.id_karyawanqc, kode);
     if (!result) notFound();
     return (
       <EmployeeQcShell
@@ -48,8 +52,10 @@ async function KaryawanQcDetailContent({ params }: PageProps) {
   }
 
   if (!isKaryawanQcSection(section)) notFound();
-  const data = getReferenceSection(section);
-  const row = getReferenceRow(section, kode);
+  const [data, row] = await Promise.all([
+    getReferenceSectionData(section, karyawan.id_karyawanqc),
+    getReferenceRowData(section, kode, karyawan.id_karyawanqc),
+  ]);
   if (!data || !row) notFound();
 
   return (

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { BahanBakuPageShell } from "../../../../../components/bahan-baku/page-shell";
 import { ProductSuccess } from "../../../../../components/data-produk/product-success";
+import { requireAdminPage } from "../../../../../lib/admin/authorization";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -16,6 +17,7 @@ export default function HapusProdukBerhasilPage({ params }: PageProps) {
 
 async function HapusProdukBerhasilContent({ params }: PageProps) {
   const { kode } = await params;
+  await requireAdminPage();
 
   return (
     <BahanBakuPageShell

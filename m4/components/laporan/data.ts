@@ -3,7 +3,7 @@ export type ReportType =
   | "Laporan Pemeriksaan QC"
   | "Laporan Tindakan Perbaikan";
 
-export type ReportAchievement = "Tercapai" | "Tidak Tercapai";
+export type ReportAchievement = "Tercapai" | "Belum tercapai" | "Tidak Tercapai";
 
 export type ProductionReport = {
   code: string;
@@ -28,83 +28,40 @@ export const reportTypes: ReportType[] = [
 
 export const reportAchievements: ReportAchievement[] = [
   "Tercapai",
-  "Tidak Tercapai",
+  "Belum tercapai",
 ];
 
 export const reportOwners = ["Onang"];
 
+// Kept for static view fallback or owner view
 export const reports: ProductionReport[] = [
   {
     code: "LP-001",
     type: "Laporan Produksi",
-    periodStart: "2026-10-01",
-    periodEnd: "2026-10-15",
-    totalProduction: 6200,
-    inspectionCount: 24,
-    rejectRate: 2.1,
-    targetRejectRate: 3,
-    achievement: "Tercapai",
+    periodStart: "2026-06-01",
+    periodEnd: "2026-06-30",
+    totalProduction: 200,
+    inspectionCount: 200,
+    rejectRate: 6.0,
+    targetRejectRate: 5.0,
+    achievement: "Belum tercapai",
     owner: "Onang",
     createdBy: "Admin",
-    correctiveAction: "Tidak ada tindakan perbaikan khusus pada periode ini.",
+    correctiveAction: "Produksi ulang, kemas ulang, penggorengan ulang",
   },
   {
     code: "LP-002",
     type: "Laporan Pemeriksaan QC",
-    periodStart: "2026-10-01",
-    periodEnd: "2026-10-15",
-    totalProduction: 5950,
-    inspectionCount: 31,
-    rejectRate: 3.4,
-    targetRejectRate: 3,
-    achievement: "Tidak Tercapai",
-    owner: "Onang",
-    createdBy: "Admin",
-    correctiveAction:
-      "Evaluasi mutu bahan baku dan proses produksi untuk menurunkan reject rate.",
-  },
-  {
-    code: "LP-003",
-    type: "Laporan Produksi",
-    periodStart: "2026-10-16",
-    periodEnd: "2026-10-22",
-    totalProduction: 2800,
-    inspectionCount: 12,
-    rejectRate: 1.9,
-    targetRejectRate: 3,
+    periodStart: "2026-08-01",
+    periodEnd: "2026-08-31",
+    totalProduction: 150,
+    inspectionCount: 150,
+    rejectRate: 4.0,
+    targetRejectRate: 5.0,
     achievement: "Tercapai",
     owner: "Onang",
     createdBy: "Admin",
     correctiveAction: "Pemeriksaan rutin berjalan sesuai standar.",
-  },
-  {
-    code: "LP-004",
-    type: "Laporan Pemeriksaan QC",
-    periodStart: "2026-10-16",
-    periodEnd: "2026-10-22",
-    totalProduction: 2800,
-    inspectionCount: 14,
-    rejectRate: 2.6,
-    targetRejectRate: 3,
-    achievement: "Tercapai",
-    owner: "Onang",
-    createdBy: "Admin",
-    correctiveAction: "Tidak ada tindakan perbaikan khusus pada periode ini.",
-  },
-  {
-    code: "LP-005",
-    type: "Laporan Tindakan Perbaikan",
-    periodStart: "2026-10-01",
-    periodEnd: "2026-10-22",
-    totalProduction: 8750,
-    inspectionCount: 45,
-    rejectRate: 2.95,
-    targetRejectRate: 3,
-    achievement: "Tercapai",
-    owner: "Onang",
-    createdBy: "Admin",
-    correctiveAction:
-      "Penyesuaian proses penggorengan dan pengecekan kemasan dilakukan.",
   },
 ];
 
@@ -118,6 +75,9 @@ export function formatReportNumber(value: number) {
 
 function getReportDateParts(date: string) {
   const parsedDate = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return { day: "—", month: "—", fullMonth: "—", year: "—" };
+  }
   const day = new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
     timeZone: "UTC",
@@ -145,16 +105,16 @@ export function formatReportDateOption(date: string) {
   return `${day} ${fullMonth} ${year}`;
 }
 
-export function formatShortReportPeriod(report: ProductionReport) {
+export function formatShortReportPeriod(report: { periodStart: string; periodEnd: string }) {
   const start = getReportDateParts(report.periodStart);
   const end = getReportDateParts(report.periodEnd);
-  return `${start.day}–${end.day} ${end.month} ${end.year}`;
+  return `${start.day} ${start.month} – ${end.day} ${end.month} ${end.year}`;
 }
 
-export function formatFullReportPeriod(report: ProductionReport) {
+export function formatFullReportPeriod(report: { periodStart: string; periodEnd: string }) {
   const start = getReportDateParts(report.periodStart);
   const end = getReportDateParts(report.periodEnd);
-  return `${start.day} – ${end.day} ${end.fullMonth} ${end.year}`;
+  return `${start.day} ${start.fullMonth} ${start.year} – ${end.day} ${end.fullMonth} ${end.year}`;
 }
 
 export function formatRejectRate(rate: number) {

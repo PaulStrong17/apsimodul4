@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
-import { getProduct } from "../../../../components/data-produk/data";
 import { ProductForm } from "../../../../components/data-produk/product-form";
+import { getAdminProduct } from "../../../../lib/admin/products";
+import { requireAdminPage } from "../../../../lib/admin/authorization";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -18,7 +19,8 @@ export default function EditProdukPage({ params }: PageProps) {
 
 async function EditProdukContent({ params }: PageProps) {
   const { kode } = await params;
-  const product = getProduct(kode);
+  const admin = await requireAdminPage();
+  const product = await getAdminProduct(admin.id_admin, kode);
 
   if (!product) {
     notFound();

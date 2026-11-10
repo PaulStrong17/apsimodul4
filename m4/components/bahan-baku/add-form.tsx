@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { FormEvent, ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
 
@@ -32,15 +32,43 @@ function FormField({
 
 export function BahanBakuAddForm() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
     const formData = new FormData(event.currentTarget);
-    const code = String(formData.get("kode") ?? "").trim();
 
-    router.push(
-      `/bahan-baku/tambah/berhasil?kode=${encodeURIComponent(code)}`,
-    );
+    try {
+      const response = await fetch("/api/admin/bahan-baku", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: formData.get("kode"),
+          name: formData.get("nama"),
+          unit: formData.get("satuan"),
+          stock: formData.get("stok"),
+          minimumStock: formData.get("stokMinimum"),
+        }),
+      });
+      const result: { code?: string; error?: string } = await response.json();
+
+      if (!response.ok || !result.code) {
+        setError(result.error ?? "Bahan baku tidak dapat disimpan.");
+        return;
+      }
+
+      router.replace(
+        `/bahan-baku/tambah/berhasil?kode=${encodeURIComponent(result.code)}`,
+      );
+      router.refresh();
+    } catch {
+      setError("Tidak dapat menghubungi server. Coba lagi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -61,6 +89,7 @@ export function BahanBakuAddForm() {
             autoComplete="off"
             placeholder="Masukkan nama bahan baku"
             required
+            maxLength={100}
             className={fieldClassName}
           />
         </FormField>
@@ -73,6 +102,7 @@ export function BahanBakuAddForm() {
             autoComplete="off"
             placeholder="Contoh: BB-007"
             required
+            maxLength={10}
             className={fieldClassName}
           />
         </FormField>
@@ -89,10 +119,10 @@ export function BahanBakuAddForm() {
               <option value="" disabled>
                 Pilih Satuan
               </option>
-              <option value="Kg">Kg</option>
-              <option value="Gram">Gram</option>
-              <option value="Liter">Liter</option>
-              <option value="Pcs">Pcs</option>
+              <option value="kg">Kg</option>
+              <option value="gram">Gram</option>
+              <option value="liter">Liter</option>
+              <option value="pcs">Pcs</option>
             </select>
             <Image
               aria-hidden="true"
@@ -136,9 +166,10 @@ export function BahanBakuAddForm() {
       <div className="mt-6 flex items-center gap-3 md:mt-[26px]">
         <Button
           type="submit"
+          disabled={isSubmitting}
           className="h-11 rounded-[9px] px-[18px] text-[15px] md:text-[17px]"
         >
-          Simpan
+          {isSubmitting ? "Menyimpan..." : "Simpan"}
         </Button>
         <Button
           type="button"
@@ -149,6 +180,11 @@ export function BahanBakuAddForm() {
           Batal
         </Button>
       </div>
+      {error ? (
+        <p role="alert" className="mt-4 text-sm text-red-700">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }

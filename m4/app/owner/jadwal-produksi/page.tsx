@@ -1,8 +1,14 @@
-import { ownerProductionSchedules } from "../../../components/owner/data";
 import { OwnerReadOnlyTable } from "../../../components/owner/read-only";
 import { OwnerPageHeading, OwnerShell } from "../../../components/owner/owner-shell";
+import { requireOwnerPage } from "../../../lib/owner/authorization";
+import { listOwnerProductionSchedules } from "../../../lib/owner/read-only";
 
-export default function OwnerJadwalProduksiPage() {
+export const instant = false;
+
+export default async function OwnerJadwalProduksiPage() {
+  const owner = await requireOwnerPage();
+  const schedules = await listOwnerProductionSchedules(owner.id_owner);
+
   return (
     <OwnerShell
       activeSection="jadwal-produksi"
@@ -16,7 +22,7 @@ export default function OwnerJadwalProduksiPage() {
         />
         <OwnerReadOnlyTable
           kind="jadwal-produksi"
-          rows={ownerProductionSchedules}
+          rows={schedules}
         />
       </div>
     </OwnerShell>

@@ -5,16 +5,16 @@ const actions = [
   {
     title: "Tambah Produk",
     description:
-      "Daftarkan produk baru dengan nama, variasi, stok, harga, dan deskripsi produk.",
+      "Daftarkan produk dengan nama, varian, stok, dan resep sesuai database.",
     icon: "/images/bahan-baku/icon-plus.svg",
     href: "/data-produk/tambah",
   },
   {
     title: "Lihat Produk",
     description:
-      "Lihat detail produk untuk memeriksa variasi, persediaan, harga, dan deskripsinya.",
+      "Lihat detail nama, varian, stok, dan resep produk yang tersimpan.",
     icon: "/images/bahan-baku/icon-eye.svg",
-    href: "/data-produk/lihat/PRD-001",
+    href: "/data-produk/lihat",
   },
   {
     title: "Update Produk",

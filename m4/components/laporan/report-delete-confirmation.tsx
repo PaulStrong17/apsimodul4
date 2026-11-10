@@ -1,6 +1,44 @@
-import Link from "next/link";
+"use client";
 
-export function ReportDeleteConfirmation({ code }: { code: string }) {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export function ReportDeleteConfirmation({
+  code,
+  type,
+}: {
+  code: string;
+  type?: string;
+}) {
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const res = await fetch(
+        `/api/admin/laporan/${encodeURIComponent(code)}`,
+        { method: "DELETE" },
+      );
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setError(data.error ?? "Terjadi kesalahan saat menghapus laporan.");
+        setIsDeleting(false);
+        return;
+      }
+
+      router.replace(`/laporan/hapus/berhasil/${encodeURIComponent(code)}`);
+      router.refresh();
+    } catch {
+      setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <section
       aria-labelledby="delete-report-title"
@@ -19,21 +57,35 @@ export function ReportDeleteConfirmation({ code }: { code: string }) {
         Hapus data laporan {code}?
       </h2>
       <p className="mt-2 text-[14px] leading-normal text-[#61738a] md:text-[17px]">
-        Data yang dihapus tidak dapat dikembalikan.
+        {type ? `Jenis: ${type}. ` : ""}Data yang dihapus tidak dapat
+        dikembalikan.
       </p>
+
+      {error && (
+        <div
+          role="alert"
+          className="mt-4 rounded-[9px] border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-700"
+        >
+          {error}
+        </div>
+      )}
+
       <div className="mt-6 flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row sm:gap-4">
-        <Link
-          href="/laporan/hapus"
+        <button
+          type="button"
+          onClick={() => router.push("/laporan/hapus")}
           className="inline-flex h-11 w-full items-center justify-center rounded-[9px] border border-[#d6e3ed] bg-white px-[18px] font-bold text-[#0a3d62] transition-colors hover:bg-[#f6f9fc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62] sm:w-[180px]"
         >
           Batal
-        </Link>
-        <Link
-          href={`/laporan/hapus/berhasil/${encodeURIComponent(code)}`}
-          className="inline-flex h-11 w-full items-center justify-center rounded-[9px] bg-[#b82926] px-[18px] font-bold text-white transition-colors hover:bg-[#9d201e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b82926] sm:w-[220px]"
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="inline-flex h-11 w-full items-center justify-center rounded-[9px] bg-[#b82926] px-[18px] font-bold text-white transition-colors hover:bg-[#9d201e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b82926] disabled:opacity-60 sm:w-[220px]"
         >
-          Ya, Hapus
-        </Link>
+          {isDeleting ? "Menghapus..." : "Ya, Hapus"}
+        </button>
       </div>
     </section>
   );

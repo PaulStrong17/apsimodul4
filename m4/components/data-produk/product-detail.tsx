@@ -1,15 +1,13 @@
 import Link from "next/link";
-import type { Product } from "./data";
-import { formatProductPrice } from "./data";
+import type { AdminProduct } from "./data";
 
-export function ProductDetail({ product }: { product: Product }) {
+export function ProductDetail({ product }: { product: AdminProduct }) {
   const details = [
     ["ID Produk", product.code],
     ["Nama Produk", product.name],
     ["Variasi", product.variation],
-    ["Stok Produk", String(product.stock)],
-    ["Harga Produk", formatProductPrice(product.price)],
-    ["Deskripsi Produk", product.description],
+    ["Stok Produk", product.stock.toLocaleString("id-ID")],
+    ["Resep Produk", product.recipe],
   ];
 
   return (
@@ -34,7 +32,7 @@ export function ProductDetail({ product }: { product: Product }) {
       </dl>
       <div className="mt-5 flex flex-wrap gap-3">
         <Link
-          href={`/data-produk/update/${product.code}`}
+          href={`/data-produk/update/${encodeURIComponent(product.code)}`}
           className="inline-flex h-[46px] items-center justify-center rounded-[9px] bg-[#0a3d62] px-[18px] text-[16px] font-semibold text-white transition-colors hover:bg-[#083451] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62]"
         >
           Perbarui

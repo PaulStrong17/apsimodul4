@@ -1,8 +1,14 @@
-import { ownerReports } from "../../../components/owner/data";
 import { OwnerReportTable } from "../../../components/owner/reports";
 import { OwnerPageHeading, OwnerShell } from "../../../components/owner/owner-shell";
+import { requireOwnerPage } from "../../../lib/owner/authorization";
+import { listOwnerReports } from "../../../lib/owner/reports";
 
-export default function OwnerReportListPage() {
+export const instant = false;
+
+export default async function OwnerReportListPage() {
+  const owner = await requireOwnerPage();
+  const reports = await listOwnerReports(owner.id_owner);
+
   return (
     <OwnerShell
       activeSection="rekap-laporan"
@@ -14,7 +20,7 @@ export default function OwnerReportListPage() {
           title="Rekap Laporan"
           description="Lihat rekap laporan produksi dan mutu. Owner dapat melihat dan menghapus rekap laporan."
         />
-        <OwnerReportTable reports={ownerReports} />
+        <OwnerReportTable reports={reports} />
       </div>
     </OwnerShell>
   );

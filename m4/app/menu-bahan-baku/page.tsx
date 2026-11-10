@@ -12,9 +12,9 @@ const actions = [
   {
     title: "Lihat Bahan Baku",
     description:
-      "Lihat detail bahan baku, jumlah persediaan, stok minimum, dan keterangan.",
+      "Lihat daftar bahan baku, jumlah persediaan, dan stok minimum.",
     icon: "/images/bahan-baku/icon-eye.svg",
-    href: "/bahan-baku/lihat/BB-001",
+    href: "/bahan-baku/lihat",
   },
   {
     title: "Update Bahan Baku",

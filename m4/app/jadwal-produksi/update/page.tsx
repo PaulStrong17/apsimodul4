@@ -2,8 +2,15 @@ import Link from "next/link";
 import { BahanBakuPageShell } from "../../../components/bahan-baku/page-shell";
 import { SchedulePageHeading } from "../../../components/jadwal-produksi/page-heading";
 import { ScheduleTable } from "../../../components/jadwal-produksi/schedule-table";
+import { listAdminSchedules } from "../../../lib/admin/schedules";
+import { requireAdminPage } from "../../../lib/admin/authorization";
 
-export default function DaftarUpdateJadwalProduksiPage() {
+export const instant = false;
+
+export default async function DaftarUpdateJadwalProduksiPage() {
+  const admin = await requireAdminPage();
+  const schedules = await listAdminSchedules(admin.id_admin);
+
   return (
     <BahanBakuPageShell
       breadcrumb="Admin / Jadwal Produksi / Update / Daftar"
@@ -15,7 +22,7 @@ export default function DaftarUpdateJadwalProduksiPage() {
           title="Update Jadwal Produksi"
           description="Cari dan pilih jadwal produksi, lalu klik Edit pada baris data yang ingin diperbarui."
         />
-        <ScheduleTable mode="update" />
+        <ScheduleTable mode="update" schedules={schedules} />
         <div className="relative z-10 mt-[18px]">
           <Link
             href="/menu-jadwal-produksi"

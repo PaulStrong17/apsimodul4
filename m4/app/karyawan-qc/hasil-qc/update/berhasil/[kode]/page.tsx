@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { EmployeeQcShell } from "../../../../../../components/karyawan-qc/employee-shell";
-import { getQualityResult } from "../../../../../../components/karyawan-qc/data";
 import { QualityResultSuccess } from "../../../../../../components/karyawan-qc/hasil-qc";
 
 type PageProps = {
@@ -18,8 +17,8 @@ export default function KaryawanQcResultEditSuccessPage({ params }: PageProps) {
 
 async function KaryawanQcResultEditSuccessContent({ params }: PageProps) {
   const { kode } = await params;
-  const result = getQualityResult(kode);
-  if (!result) notFound();
+  const decoded = decodeURIComponent(kode).trim();
+  if (!decoded) notFound();
 
   return (
     <EmployeeQcShell
@@ -27,7 +26,7 @@ async function KaryawanQcResultEditSuccessContent({ params }: PageProps) {
       breadcrumb="Hasil QC / Konfirmasi"
       backgroundImage="/images/karyawan-qc/background-hasil-qc.jpg"
     >
-      <QualityResultSuccess action="updated" code={result.code} />
+      <QualityResultSuccess action="updated" code={decoded.toUpperCase()} />
     </EmployeeQcShell>
   );
 }

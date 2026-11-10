@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getOwnerReport } from "../../../../../components/owner/data";
 import { OwnerReportDeleteConfirmation } from "../../../../../components/owner/reports";
 import { OwnerPageHeading, OwnerShell } from "../../../../../components/owner/owner-shell";
+import { requireOwnerPage } from "../../../../../lib/owner/authorization";
+import { getOwnerReport } from "../../../../../lib/owner/reports";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -18,7 +19,8 @@ export default function OwnerReportDeletePage({ params }: PageProps) {
 
 async function OwnerReportDeleteContent({ params }: PageProps) {
   const { kode } = await params;
-  const report = getOwnerReport(kode);
+  const owner = await requireOwnerPage();
+  const report = await getOwnerReport(owner.id_owner, kode);
 
   if (!report) notFound();
 

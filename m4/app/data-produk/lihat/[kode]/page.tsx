@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
-import { getProduct } from "../../../../components/data-produk/data";
 import { ProductDetail } from "../../../../components/data-produk/product-detail";
+import { getAdminProduct } from "../../../../lib/admin/products";
+import { requireAdminPage } from "../../../../lib/admin/authorization";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -18,7 +19,8 @@ export default function LihatProdukPage({ params }: PageProps) {
 
 async function LihatProdukContent({ params }: PageProps) {
   const { kode } = await params;
-  const product = getProduct(kode);
+  const admin = await requireAdminPage();
+  const product = await getAdminProduct(admin.id_admin, kode);
 
   if (!product) {
     notFound();
@@ -36,7 +38,7 @@ async function LihatProdukContent({ params }: PageProps) {
             Detail Data Produk
           </h1>
           <p className="text-[14px] leading-[1.5] text-[#61738a] md:text-[16px]">
-            Contoh detail berdasarkan entitas Produk.
+            Detail data produk yang tersimpan di database.
           </p>
         </div>
         <ProductDetail product={product} />

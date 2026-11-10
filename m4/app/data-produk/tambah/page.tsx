@@ -1,6 +1,5 @@
 import { BahanBakuPageShell } from "../../../components/bahan-baku/page-shell";
 import { ProductForm } from "../../../components/data-produk/product-form";
-import { ProductGallery } from "../../../components/data-produk/product-gallery";
 
 export default function TambahProdukPage() {
   return (
@@ -15,11 +14,10 @@ export default function TambahProdukPage() {
             Tambah Data Produk
           </h1>
           <p className="text-[14px] leading-[1.5] text-[#61738a] md:text-[16px]">
-            Isi data sesuai entitas Produk pada ERD final.
+            Isi data produk sesuai kolom yang tersedia di database.
           </p>
         </div>
         <ProductForm mode="add" />
-        <ProductGallery />
       </div>
     </BahanBakuPageShell>
   );

@@ -17,7 +17,8 @@ export default function KaryawanQcResultCreateSuccessPage({ params }: PageProps)
 
 async function KaryawanQcResultCreateSuccessContent({ params }: PageProps) {
   const { kode } = await params;
-  if (!/^HQC-\d{3}$/i.test(kode)) notFound();
+  const decoded = decodeURIComponent(kode).trim();
+  if (!decoded) notFound();
 
   return (
     <EmployeeQcShell
@@ -25,7 +26,7 @@ async function KaryawanQcResultCreateSuccessContent({ params }: PageProps) {
       breadcrumb="Hasil QC / Konfirmasi"
       backgroundImage="/images/karyawan-qc/background-hasil-qc.jpg"
     >
-      <QualityResultSuccess action="added" code={kode.toUpperCase()} />
+      <QualityResultSuccess action="added" code={decoded.toUpperCase()} />
     </EmployeeQcShell>
   );
 }

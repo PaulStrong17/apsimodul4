@@ -1,8 +1,14 @@
-import { ownerQualitySchedules } from "../../../components/owner/data";
 import { OwnerReadOnlyTable } from "../../../components/owner/read-only";
 import { OwnerPageHeading, OwnerShell } from "../../../components/owner/owner-shell";
+import { requireOwnerPage } from "../../../lib/owner/authorization";
+import { listOwnerQualitySchedules } from "../../../lib/owner/read-only";
 
-export default function OwnerJadwalQcPage() {
+export const instant = false;
+
+export default async function OwnerJadwalQcPage() {
+  const owner = await requireOwnerPage();
+  const schedules = await listOwnerQualitySchedules(owner.id_owner);
+
   return (
     <OwnerShell
       activeSection="jadwal-qc"
@@ -14,7 +20,7 @@ export default function OwnerJadwalQcPage() {
           title="Jadwal QC"
           description="Daftar jadwal pemeriksaan QC hanya untuk dilihat. Klik Lihat untuk membuka rincian."
         />
-        <OwnerReadOnlyTable kind="jadwal-qc" rows={ownerQualitySchedules} />
+        <OwnerReadOnlyTable kind="jadwal-qc" rows={schedules} />
       </div>
     </OwnerShell>
   );

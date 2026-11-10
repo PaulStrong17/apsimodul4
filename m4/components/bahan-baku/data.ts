@@ -8,6 +8,8 @@ export type BahanBaku = {
   note: string;
 };
 
+export type AdminBahanBaku = Omit<BahanBaku, "price" | "note">;
+
 export const bahanBakuData: BahanBaku[] = [
   {
     code: "BB-001",

@@ -1,23 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import {
-  getOwnerMaterial,
-  getOwnerProduct,
-  getOwnerProductionSchedule,
-  getOwnerQualitySchedule,
-  formatOwnerDate,
-} from "../../../../components/owner/data";
-import {
-  OwnerReadOnlyDetail,
-  ownerMaterialDetailFields,
-} from "../../../../components/owner/read-only";
-import { formatProductPrice } from "../../../../components/data-produk/data";
-import {
-  formatProductionDate,
-  getProductRequestLabel,
-} from "../../../../components/jadwal-produksi/data";
-import { getProductionScheduleLabel } from "../../../../components/jadwal-qc/data";
+import { OwnerReadOnlyDetail } from "../../../../components/owner/read-only";
 import { OwnerShell, type OwnerSection } from "../../../../components/owner/owner-shell";
+import { requireOwnerPage } from "../../../../lib/owner/authorization";
+import { getOwnerReadOnlyDetail } from "../../../../lib/owner/read-only";
 
 type PageProps = {
   params: Promise<{ section: string; kode: string }>;
@@ -63,7 +49,8 @@ async function OwnerReadOnlyDetailContent({ params }: PageProps) {
 
   if (!info) notFound();
 
-  const detail = getDetail(section, kode);
+  const owner = await requireOwnerPage();
+  const detail = await getOwnerReadOnlyDetail(section, kode, owner.id_owner);
   if (!detail) notFound();
 
   return (
@@ -83,107 +70,4 @@ async function OwnerReadOnlyDetailContent({ params }: PageProps) {
       </div>
     </OwnerShell>
   );
-}
-
-function getDetail(section: string, code: string) {
-  if (section === "bahan-baku") {
-    const material = getOwnerMaterial(code);
-    return material
-      ? {
-          title: material.name,
-          code: material.code,
-          fields: ownerMaterialDetailFields(material),
-        }
-      : undefined;
-  }
-
-  if (section === "data-produk") {
-    const product = getOwnerProduct(code);
-    return product
-      ? {
-          title: product.name,
-          code: product.code,
-          fields: [
-            { label: "Variasi", value: product.variation },
-            { label: "Stok Produk", value: `${product.stock} pcs` },
-            { label: "Harga Produk", value: formatProductPrice(product.price) },
-            { label: "Resep Produk", value: `Resep ${product.name}` },
-            { label: "Deskripsi Produk", value: product.description },
-          ],
-        }
-      : undefined;
-  }
-
-  if (section === "jadwal-produksi") {
-    const schedule = getOwnerProductionSchedule(code);
-    return schedule
-      ? {
-          title: `Produksi ${schedule.productName}`,
-          code: schedule.code,
-          fields: [
-            {
-              label: "Tanggal Produksi",
-              value: formatProductionDate(schedule.productionDate),
-            },
-            { label: "Jumlah Target", value: `${schedule.target} pcs` },
-            {
-              label: "Permintaan Produk",
-              value: getProductRequestLabel(schedule),
-            },
-            { label: "Status Jadwal", value: schedule.status },
-            {
-              label: "Karyawan Produksi",
-              value: schedule.productionEmployee,
-            },
-            { label: "Karyawan QC", value: schedule.qualityControlEmployee },
-            {
-              label: "Status Verifikasi",
-              value:
-                schedule.verificationStatus === "Terverifikasi"
-                  ? "Terverifikasi"
-                  : "Belum Terverifikasi",
-            },
-            { label: "Owner Penanggung Jawab", value: schedule.owner },
-          ],
-        }
-      : undefined;
-  }
-
-  if (section === "jadwal-qc") {
-    const schedule = getOwnerQualitySchedule(code);
-    return schedule
-      ? {
-          title:
-            schedule.code === "JQ-001" ? "Pemeriksaan Produk" : schedule.type,
-          code: schedule.code,
-          fields: [
-            {
-              label: "Tanggal Pemeriksaan",
-              value: formatOwnerDate(schedule.inspectionDate, "long"),
-            },
-            {
-              label: "Jadwal Produksi",
-              value: getProductionScheduleLabel(schedule),
-            },
-            { label: "Karyawan QC", value: schedule.qualityControlEmployee },
-            {
-              label: "Karyawan Produksi",
-              value: schedule.productionEmployee,
-            },
-            { label: "Status Pemeriksaan", value: schedule.status },
-            {
-              label: "Status Verifikasi",
-              value:
-                schedule.verificationStatus === "Terverifikasi"
-                  ? "Terverifikasi"
-                  : "Belum Terverifikasi",
-            },
-            { label: "Owner Penanggung Jawab", value: schedule.owner },
-            { label: "Dicatat oleh", value: schedule.createdBy },
-          ],
-        }
-      : undefined;
-  }
-
-  return undefined;
 }

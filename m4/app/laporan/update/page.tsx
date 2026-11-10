@@ -2,8 +2,15 @@ import Link from "next/link";
 import { BahanBakuPageShell } from "../../../components/bahan-baku/page-shell";
 import { ReportPageHeading } from "../../../components/laporan/page-heading";
 import { ReportTable } from "../../../components/laporan/report-table";
+import { requireAdminPage } from "../../../lib/admin/authorization";
+import { listAdminReports } from "../../../lib/admin/reports";
 
-export default function DaftarUpdateLaporanPage() {
+export const instant = false;
+
+export default async function DaftarUpdateLaporanPage() {
+  const admin = await requireAdminPage();
+  const reports = await listAdminReports(admin.id_admin);
+
   return (
     <BahanBakuPageShell
       breadcrumb="Admin / Laporan / Update / Daftar"
@@ -15,7 +22,7 @@ export default function DaftarUpdateLaporanPage() {
           title="Update Laporan"
           description="Cari dan pilih laporan, lalu klik Edit pada baris data yang ingin diperbarui."
         />
-        <ReportTable mode="update" />
+        <ReportTable mode="update" reports={reports} />
         <div className="relative z-10 mt-[18px]">
           <Link
             href="/menu-laporan"

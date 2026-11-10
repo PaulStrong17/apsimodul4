@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuDeleteConfirmation } from "../../../../../components/bahan-baku/delete-confirmation";
-import { getBahanBaku } from "../../../../../components/bahan-baku/data";
 import { BahanBakuPageShell } from "../../../../../components/bahan-baku/page-shell";
+import { getAdminMaterial } from "../../../../../lib/admin/materials";
+import { requireAdminPage } from "../../../../../lib/admin/authorization";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -18,7 +19,8 @@ export default function KonfirmasiHapusBahanBakuPage({ params }: PageProps) {
 
 async function KonfirmasiHapusBahanBakuContent({ params }: PageProps) {
   const { kode } = await params;
-  const material = getBahanBaku(kode);
+  const admin = await requireAdminPage();
+  const material = await getAdminMaterial(admin.id_admin, kode);
 
   if (!material) {
     notFound();

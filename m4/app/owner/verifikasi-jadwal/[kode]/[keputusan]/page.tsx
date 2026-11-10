@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { OwnerVerificationResult } from "../../../../../components/owner/verification";
-import { verificationItems } from "../../../../../components/owner/data";
 import { OwnerPageHeading, OwnerShell } from "../../../../../components/owner/owner-shell";
+import { requireOwnerPage } from "../../../../../lib/owner/authorization";
+import { verifySchedule } from "../../../../../lib/owner/verification";
 
 type PageProps = {
   params: Promise<{ kode: string; keputusan: string }>;
@@ -22,16 +23,17 @@ async function OwnerVerificationDecisionContent({
   params,
 }: PageProps) {
   const { kode, keputusan } = await params;
-  const validCode = verificationItems.some(
-    (item) =>
-      item.code.toLowerCase() === kode.toLowerCase() &&
-      item.status === "Menunggu Keputusan",
-  );
-
-  if (!validCode || (keputusan !== "setujui" && keputusan !== "tolak")) {
+  if (keputusan !== "setujui" && keputusan !== "tolak") {
     notFound();
   }
+
+  const owner = await requireOwnerPage();
   const decision = keputusan === "setujui" ? "setujui" : "tolak";
+  const result = await verifySchedule(owner.id_owner, kode, decision);
+
+  if (!result) {
+    notFound();
+  }
 
   return (
     <OwnerShell

@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import {
-  getProductionReference,
-  getProductionRow,
   isProductionReferenceSection,
   isProductionSection,
 } from "../../../../components/karyawan-produksi/data";
@@ -11,6 +9,13 @@ import {
   ProductionShell,
 } from "../../../../components/karyawan-produksi/production-shell";
 import { ProductionDetails } from "../../../../components/karyawan-produksi/production-pages";
+import { requireKaryawanProduksiPage } from "../../../../lib/karyawan-produksi/authorization";
+import {
+  getProductionReferenceData,
+  getProductionRowData,
+} from "../../../../lib/karyawan-produksi/reference";
+
+export const instant = false;
 
 type PageProps = {
   params: Promise<{ section: string; kode: string }>;
@@ -30,8 +35,11 @@ async function KaryawanProduksiDetailContent({ params }: PageProps) {
     notFound();
   }
 
-  const data = getProductionReference(section);
-  const row = getProductionRow(section, kode);
+  const karyawan = await requireKaryawanProduksiPage();
+  const [data, row] = await Promise.all([
+    getProductionReferenceData(section, karyawan.id_karyawanproduksi),
+    getProductionRowData(section, kode, karyawan.id_karyawanproduksi),
+  ]);
   if (!data || !row) notFound();
 
   return (

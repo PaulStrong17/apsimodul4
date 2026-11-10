@@ -1,8 +1,12 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { EmployeeQcHeading, EmployeeQcShell } from "../../../components/karyawan-qc/employee-shell";
-import { isKaryawanQcSection, referenceSections } from "../../../components/karyawan-qc/data";
+import { isKaryawanQcSection } from "../../../components/karyawan-qc/data";
 import { ReferenceTable } from "../../../components/karyawan-qc/reference-data";
+import { requireKaryawanQcPage } from "../../../lib/karyawan-qc/authorization";
+import { getReferenceSectionData } from "../../../lib/karyawan-qc/reference";
+
+export const instant = false;
 
 type PageProps = {
   params: Promise<{ section: string }>;
@@ -20,7 +24,10 @@ async function KaryawanQcReferenceContent({ params }: PageProps) {
   const { section } = await params;
   if (!isKaryawanQcSection(section)) notFound();
 
-  const data = referenceSections[section];
+  const karyawan = await requireKaryawanQcPage();
+  const data = await getReferenceSectionData(section, karyawan.id_karyawanqc);
+  if (!data) notFound();
+
   return (
     <EmployeeQcShell
       activeSection={section}

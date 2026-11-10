@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   formatFullReportPeriod,
   formatReportNumber,
@@ -38,62 +42,73 @@ export function OwnerReportTable({
             </tr>
           </thead>
           <tbody>
-            {reports.map((report) => (
-              <tr
-                key={report.code}
-                className="min-h-[68px] border-t border-[#d6e3ed]"
-              >
-                <td className="px-4 py-3 text-[#61738a]">{report.code}</td>
-                <td className="max-w-[190px] px-4 py-3 font-bold">
-                  {report.type}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  {formatShortReportPeriod(report)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  {formatReportNumber(report.totalProduction)} pcs
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  {formatRejectRate(report.rejectRate)}
-                </td>
-                <td className="px-4 py-3">{report.achievement}</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/owner/rekap-laporan/${report.code}`}
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-[8px] border border-[#d6e3ed] bg-white px-3 font-bold text-[#0a3d62] transition-colors hover:bg-[#f6f9fc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62] md:h-11 md:px-[14px]"
-                    >
-                      <Image
-                        src="/images/bahan-baku/icon-eye.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                      />
-                      Lihat
-                    </Link>
-                    <Link
-                      href={`/owner/rekap-laporan/hapus/${report.code}`}
-                      aria-label={`Hapus rekap laporan ${report.code}`}
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-[8px] bg-[#b82926] px-3 font-bold text-white transition-colors hover:bg-[#9d201e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b82926] md:h-11 md:px-[14px]"
-                    >
-                      <Image
-                        src="/images/bahan-baku/icon-trash.svg"
-                        alt=""
-                        width={15}
-                        height={15}
-                        className="brightness-0 invert"
-                      />
-                      Hapus
-                    </Link>
-                  </div>
+            {reports.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-6 py-10 text-center text-[#61738a]"
+                >
+                  Belum ada rekap laporan.
                 </td>
               </tr>
-            ))}
+            ) : (
+              reports.map((report) => (
+                <tr
+                  key={report.code}
+                  className="min-h-[68px] border-t border-[#d6e3ed]"
+                >
+                  <td className="px-4 py-3 text-[#61738a]">{report.code}</td>
+                  <td className="max-w-[190px] px-4 py-3 font-bold">
+                    {report.type}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {formatShortReportPeriod(report)}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {formatReportNumber(report.totalProduction)} pcs
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {formatRejectRate(report.rejectRate)}
+                  </td>
+                  <td className="px-4 py-3">{report.achievement}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/owner/rekap-laporan/${encodeURIComponent(report.code)}`}
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[8px] border border-[#d6e3ed] bg-white px-3 font-bold text-[#0a3d62] transition-colors hover:bg-[#f6f9fc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62] md:h-11 md:px-[14px]"
+                      >
+                        <Image
+                          src="/images/bahan-baku/icon-eye.svg"
+                          alt=""
+                          width={16}
+                          height={16}
+                        />
+                        Lihat
+                      </Link>
+                      <Link
+                        href={`/owner/rekap-laporan/hapus/${encodeURIComponent(report.code)}`}
+                        aria-label={`Hapus rekap laporan ${report.code}`}
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-[8px] bg-[#b82926] px-3 font-bold text-white transition-colors hover:bg-[#9d201e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b82926] md:h-11 md:px-[14px]"
+                      >
+                        <Image
+                          src="/images/bahan-baku/icon-trash.svg"
+                          alt=""
+                          width={15}
+                          height={15}
+                          className="brightness-0 invert"
+                        />
+                        Hapus
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
       <div className="flex items-center justify-between border-t border-[#d6e3ed] px-4 py-[14px] text-[13px] text-[#61738a] md:px-6">
-        <p>Menampilkan 1–{reports.length} dari {reports.length} rekap laporan</p>
+        <p>Menampilkan {reports.length} rekap laporan</p>
         <p className="font-medium text-[#0a3d62]">Halaman 1 dari 1</p>
       </div>
     </section>
@@ -143,7 +158,7 @@ export function OwnerReportDetail({ report }: { report: ProductionReport }) {
           Hasil Tindakan Perbaikan
         </p>
         <p className="mt-1 text-[14px] text-[#17263b] md:text-[16px]">
-          {report.correctiveAction}
+          {report.correctiveAction || "—"}
         </p>
       </div>
       <p className="mt-5 rounded-md bg-[#f6f9fc] p-3 text-[13px] leading-relaxed text-[#61738a] md:text-[15px]">
@@ -158,7 +173,7 @@ export function OwnerReportDetail({ report }: { report: ProductionReport }) {
           Kembali
         </Link>
         <Link
-          href={`/owner/rekap-laporan/hapus/${report.code}`}
+          href={`/owner/rekap-laporan/hapus/${encodeURIComponent(report.code)}`}
           className="inline-flex h-11 items-center gap-2 rounded-[9px] bg-[#b82926] px-4 font-bold text-white hover:bg-[#9d201e]"
         >
           <Image
@@ -180,6 +195,37 @@ export function OwnerReportDeleteConfirmation({
 }: {
   code: string;
 }) {
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const res = await fetch(
+        `/api/owner/rekap-laporan/${encodeURIComponent(code)}`,
+        { method: "DELETE" },
+      );
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setError(data.error ?? "Terjadi kesalahan saat menghapus laporan.");
+        setIsDeleting(false);
+        return;
+      }
+
+      router.replace(
+        `/owner/rekap-laporan/hapus/berhasil/${encodeURIComponent(code)}`,
+      );
+      router.refresh();
+    } catch {
+      setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <section
       aria-labelledby="owner-delete-title"
@@ -200,6 +246,16 @@ export function OwnerReportDeleteConfirmation({
       <p className="mt-2 text-center text-[14px] text-[#61738a] md:text-[17px]">
         Data yang dihapus tidak dapat dikembalikan.
       </p>
+
+      {error && (
+        <div
+          role="alert"
+          className="mt-4 rounded-[9px] border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-700"
+        >
+          {error}
+        </div>
+      )}
+
       <div className="mt-5 flex w-full max-w-[420px] gap-3">
         <Link
           href="/owner/rekap-laporan"
@@ -207,12 +263,14 @@ export function OwnerReportDeleteConfirmation({
         >
           Batal
         </Link>
-        <Link
-          href={`/owner/rekap-laporan/hapus/berhasil/${code}`}
-          className="inline-flex h-11 flex-1 items-center justify-center rounded-[9px] bg-[#b82926] font-bold text-white hover:bg-[#9d201e]"
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="inline-flex h-11 flex-1 items-center justify-center rounded-[9px] bg-[#b82926] font-bold text-white hover:bg-[#9d201e] disabled:opacity-60"
         >
-          Ya, Hapus
-        </Link>
+          {isDeleting ? "Menghapus..." : "Ya, Hapus"}
+        </button>
       </div>
     </section>
   );

@@ -2,8 +2,9 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../../components/bahan-baku/page-shell";
 import { ScheduleDeleteConfirmation } from "../../../../../components/jadwal-produksi/schedule-delete-confirmation";
-import { getProductionSchedule } from "../../../../../components/jadwal-produksi/data";
 import { SchedulePageHeading } from "../../../../../components/jadwal-produksi/page-heading";
+import { getAdminSchedule } from "../../../../../lib/admin/schedules";
+import { requireAdminPage } from "../../../../../lib/admin/authorization";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -21,7 +22,8 @@ export default function KonfirmasiHapusJadwalPage({ params }: PageProps) {
 
 async function KonfirmasiHapusJadwalContent({ params }: PageProps) {
   const { kode } = await params;
-  const schedule = getProductionSchedule(kode);
+  const admin = await requireAdminPage();
+  const schedule = await getAdminSchedule(admin.id_admin, kode);
 
   if (!schedule) {
     notFound();
@@ -39,7 +41,10 @@ async function KonfirmasiHapusJadwalContent({ params }: PageProps) {
           description="Tindakan ini perlu konfirmasi."
         />
         <div className="relative z-10 flex flex-1 items-center justify-center py-8">
-          <ScheduleDeleteConfirmation code={schedule.code} />
+          <ScheduleDeleteConfirmation
+            code={schedule.code}
+            productName={schedule.productName}
+          />
         </div>
       </div>
     </BahanBakuPageShell>

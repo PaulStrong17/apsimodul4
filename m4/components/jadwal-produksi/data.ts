@@ -1,13 +1,13 @@
 export type ProductionScheduleStatus =
   | "Direncanakan"
-  | "Berjalan"
+  | "Terjadwal"
   | "Selesai"
   | "Dibatalkan";
 
 export type VerificationStatus =
-  | "Belum Terverifikasi"
+  | "Menunggu"
   | "Terverifikasi"
-  | "Perlu Revisi";
+  | "Ditolak";
 
 export type ProductionSchedule = {
   code: string;
@@ -55,8 +55,8 @@ export const productionSchedules: ProductionSchedule[] = [
     target: 600,
     productionEmployee: "Raffa Fahrezy",
     qualityControlEmployee: "Rizki Dinu",
-    status: "Berjalan",
-    verificationStatus: "Belum Terverifikasi",
+    status: "Terjadwal",
+    verificationStatus: "Menunggu",
     owner: "Onang",
   },
   {
@@ -68,7 +68,7 @@ export const productionSchedules: ProductionSchedule[] = [
     productionEmployee: "Handika Kurniawan",
     qualityControlEmployee: "Rizki Dinu",
     status: "Direncanakan",
-    verificationStatus: "Belum Terverifikasi",
+    verificationStatus: "Menunggu",
     owner: "Onang",
   },
   {
@@ -80,7 +80,7 @@ export const productionSchedules: ProductionSchedule[] = [
     productionEmployee: "Raffa Fahrezy",
     qualityControlEmployee: "Rizki Dinu",
     status: "Direncanakan",
-    verificationStatus: "Belum Terverifikasi",
+    verificationStatus: "Menunggu",
     owner: "Onang",
   },
 ];
@@ -95,14 +95,14 @@ export const productionEmployees = ["Raffa Fahrezy", "Handika Kurniawan"];
 export const qualityControlEmployees = ["Rizki Dinu"];
 export const scheduleStatuses: ProductionScheduleStatus[] = [
   "Direncanakan",
-  "Berjalan",
+  "Terjadwal",
   "Selesai",
   "Dibatalkan",
 ];
 export const verificationStatuses: VerificationStatus[] = [
-  "Belum Terverifikasi",
+  "Menunggu",
   "Terverifikasi",
-  "Perlu Revisi",
+  "Ditolak",
 ];
 export const scheduleOwners = ["Onang"];
 

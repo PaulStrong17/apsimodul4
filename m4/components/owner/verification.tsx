@@ -2,9 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { verificationItems, formatOwnerDate } from "./data";
+import { formatOwnerDate } from "./data";
+import type {
+  OwnerVerificationItem,
+  OwnerVerificationDetailData,
+} from "@/lib/owner/verification";
 
-export function OwnerVerificationTable() {
+export function OwnerVerificationTable({
+  items,
+}: {
+  items: OwnerVerificationItem[];
+}) {
+  const waitingCount = items.filter(
+    (item) => item.status === "Menunggu Keputusan",
+  ).length;
+
   return (
     <section className="relative z-10 w-full overflow-hidden rounded-[14px] border border-[#d6e3ed] bg-white">
       <div className="px-4 py-[18px] md:px-6">
@@ -12,7 +24,7 @@ export function OwnerVerificationTable() {
           Keputusan Verifikasi Jadwal
         </h2>
         <p className="mt-1 inline-flex rounded-md bg-[#eaf4fc] px-2 py-1 text-[13px] font-bold text-[#0a3d62]">
-          3 jadwal menunggu keputusan
+          {waitingCount} jadwal menunggu keputusan
         </p>
       </div>
       <div className="overflow-x-auto">
@@ -35,62 +47,85 @@ export function OwnerVerificationTable() {
             </tr>
           </thead>
           <tbody>
-            {verificationItems.map((item) => {
-              const waiting = item.status === "Menunggu Keputusan";
-
-              return (
-                <tr
-                  key={item.code}
-                  className="min-h-[48px] border-t border-[#d6e3ed]"
+            {items.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-6 py-10 text-center text-[#61738a]"
                 >
-                  <td className="px-4 py-3 text-[#61738a]">{item.code}</td>
-                  <td className="px-4 py-3 font-bold">{item.type}</td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    {formatOwnerDate(item.date)}
-                  </td>
-                  <td className="px-4 py-3">{item.description}</td>
-                  <td className="px-4 py-3">{item.responsible}</td>
-                  <td className="px-4 py-3">{item.status}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/owner/verifikasi-jadwal/${item.code}`}
-                        className="inline-flex h-9 items-center justify-center gap-1 rounded-[8px] border border-[#d6e3ed] bg-white px-3 font-bold text-[#0a3d62] hover:bg-[#f6f9fc]"
+                  Belum ada jadwal yang membutuhkan verifikasi.
+                </td>
+              </tr>
+            ) : (
+              items.map((item) => {
+                const waiting = item.status === "Menunggu Keputusan";
+
+                return (
+                  <tr
+                    key={item.code}
+                    className="min-h-[48px] border-t border-[#d6e3ed]"
+                  >
+                    <td className="px-4 py-3 text-[#61738a]">{item.code}</td>
+                    <td className="px-4 py-3 font-bold">{item.type}</td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {item.date ? formatOwnerDate(item.date) : "—"}
+                    </td>
+                    <td className="px-4 py-3">{item.description}</td>
+                    <td className="px-4 py-3">{item.responsible}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex rounded-md px-2 py-1 text-[12px] font-bold ${
+                          waiting
+                            ? "bg-[#fff4df] text-[#9b6500]"
+                            : item.status === "Sudah Disetujui"
+                              ? "bg-[#e2f7e7] text-[#1c7430]"
+                              : "bg-[#ffdcdc] text-[#b82926]"
+                        }`}
                       >
-                        <Image
-                          src="/images/bahan-baku/icon-eye.svg"
-                          alt=""
-                          width={14}
-                          height={14}
-                        />
-                        Lihat
-                      </Link>
-                      {waiting ? (
-                        <>
-                          <Link
-                            href={`/owner/verifikasi-jadwal/${item.code}/setujui`}
-                            className="inline-flex h-9 items-center justify-center rounded-[8px] bg-[#4da8da] px-3 font-bold text-white transition-colors hover:bg-[#268bc3]"
-                          >
-                            Setujui
-                          </Link>
-                          <Link
-                            href={`/owner/verifikasi-jadwal/${item.code}/tolak`}
-                            className="inline-flex h-9 items-center justify-center rounded-[8px] border border-[#d6e3ed] px-3 font-bold text-[#0a3d62] hover:bg-[#f6f9fc]"
-                          >
-                            Tolak
-                          </Link>
-                        </>
-                      ) : null}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/owner/verifikasi-jadwal/${encodeURIComponent(item.code)}`}
+                          className="inline-flex h-9 items-center justify-center gap-1 rounded-[8px] border border-[#d6e3ed] bg-white px-3 font-bold text-[#0a3d62] hover:bg-[#f6f9fc]"
+                        >
+                          <Image
+                            src="/images/bahan-baku/icon-eye.svg"
+                            alt=""
+                            width={14}
+                            height={14}
+                          />
+                          Lihat
+                        </Link>
+                        {waiting ? (
+                          <>
+                            <Link
+                              href={`/owner/verifikasi-jadwal/${encodeURIComponent(item.code)}/setujui`}
+                              className="inline-flex h-9 items-center justify-center rounded-[8px] bg-[#4da8da] px-3 font-bold text-white transition-colors hover:bg-[#268bc3]"
+                            >
+                              Setujui
+                            </Link>
+                            <Link
+                              href={`/owner/verifikasi-jadwal/${encodeURIComponent(item.code)}/tolak`}
+                              className="inline-flex h-9 items-center justify-center rounded-[8px] border border-[#d6e3ed] px-3 font-bold text-[#0a3d62] hover:bg-[#f6f9fc]"
+                            >
+                              Tolak
+                            </Link>
+                          </>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
       <div className="flex items-center justify-between border-t border-[#d6e3ed] px-4 py-[14px] text-[13px] text-[#61738a] md:px-6">
-        <p>Menampilkan 1–5 dari 5 jadwal</p>
+        <p>Menampilkan {items.length} jadwal</p>
         <p className="font-medium text-[#0a3d62]">Halaman 1 dari 1</p>
       </div>
     </section>
@@ -98,26 +133,20 @@ export function OwnerVerificationTable() {
 }
 
 export function OwnerVerificationDetail({
-  code,
+  detail,
 }: {
-  code: string;
+  detail: OwnerVerificationDetailData;
 }) {
-  const item = verificationItems.find(
-    (verification) => verification.code.toLowerCase() === code.toLowerCase(),
-  );
-
-  if (!item) return null;
-
-  const waiting = item.status === "Menunggu Keputusan";
+  const waiting = detail.status === "Menunggu Keputusan";
   const fields = [
-    ["Kode Jadwal", item.code],
-    ["Jenis Jadwal", item.type],
-    ["Tanggal Produksi", formatOwnerDate(item.date, "long")],
-    ["Nama Produk", item.description.split(" · ")[0]],
-    ["Jumlah Produksi", item.description.split(" · ")[1] ?? "Belum dicatat"],
-    ["Penanggung Jawab", item.responsible],
-    ["Tanggal Pengajuan", waiting ? "Belum dicatat" : formatOwnerDate(item.date, "long")],
-    ["Status Verifikasi", item.status],
+    ["Kode Jadwal", detail.code],
+    ["Jenis Jadwal", detail.type],
+    ["Tanggal Jadwal", detail.date ? formatOwnerDate(detail.date, "long") : "—"],
+    ["Nama Produk / Pemeriksaan", detail.productName],
+    ["Jumlah / Keterangan", detail.amount],
+    ["Penanggung Jawab", detail.responsible],
+    ["Tanggal Pengajuan", detail.date ? formatOwnerDate(detail.date, "long") : "—"],
+    ["Status Verifikasi", detail.status],
   ];
 
   return (
@@ -137,11 +166,19 @@ export function OwnerVerificationDetail({
               Detail Jadwal
             </h2>
             <p className="mt-1 text-[14px] text-[#61738a]">
-              {item.code} · Informasi {item.type}
+              {detail.code} · Informasi {detail.type}
             </p>
           </div>
-          <span className="rounded-md bg-[#fff4df] px-3 py-2 text-[13px] font-bold text-[#9b6500]">
-            {item.status}
+          <span
+            className={`rounded-md px-3 py-2 text-[13px] font-bold ${
+              waiting
+                ? "bg-[#fff4df] text-[#9b6500]"
+                : detail.status === "Sudah Disetujui"
+                  ? "bg-[#e2f7e7] text-[#1c7430]"
+                  : "bg-[#ffdcdc] text-[#b82926]"
+            }`}
+          >
+            {detail.status}
           </span>
         </div>
         <dl className="mt-6 grid grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
@@ -162,21 +199,21 @@ export function OwnerVerificationDetail({
               Riwayat Verifikasi
             </h3>
             <p className="text-[12px] text-[#61738a]">
-              {waiting ? "Belum ada keputusan Owner" : "Sudah diverifikasi"}
+              {waiting ? "Belum ada keputusan Owner" : `Keputusan: ${detail.status}`}
             </p>
           </div>
           <div className="mt-3 grid gap-3 text-[13px] md:grid-cols-3">
             <p>
               <span className="block text-[#61738a]">Tanggal Keputusan</span>
-              {waiting ? "Belum tersedia" : formatOwnerDate(item.date, "long")}
+              {waiting ? "Belum tersedia" : formatOwnerDate(detail.date, "long")}
             </p>
             <p>
               <span className="block text-[#61738a]">Keputusan Owner</span>
-              {item.status}
+              {detail.status}
             </p>
             <p>
               <span className="block text-[#61738a]">Catatan</span>
-              Belum tersedia
+              {waiting ? "Menunggu keputusan" : "Telah diproses oleh Owner"}
             </p>
           </div>
         </div>
@@ -190,14 +227,14 @@ export function OwnerVerificationDetail({
           {waiting ? (
             <div className="flex gap-2">
               <Link
-                href={`/owner/verifikasi-jadwal/${item.code}/setujui`}
-                className="inline-flex h-11 items-center rounded-[8px] bg-[#297a4f] px-4 font-bold text-white"
+                href={`/owner/verifikasi-jadwal/${encodeURIComponent(detail.code)}/setujui`}
+                className="inline-flex h-11 items-center rounded-[8px] bg-[#297a4f] px-4 font-bold text-white hover:bg-[#20633f]"
               >
                 Setujui
               </Link>
               <Link
-                href={`/owner/verifikasi-jadwal/${item.code}/tolak`}
-                className="inline-flex h-11 items-center rounded-[8px] bg-[#c8373a] px-4 font-bold text-white"
+                href={`/owner/verifikasi-jadwal/${encodeURIComponent(detail.code)}/tolak`}
+                className="inline-flex h-11 items-center rounded-[8px] bg-[#c8373a] px-4 font-bold text-white hover:bg-[#a92c2f]"
               >
                 Tolak
               </Link>

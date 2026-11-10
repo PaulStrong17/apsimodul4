@@ -2,8 +2,15 @@ import Link from "next/link";
 import { BahanBakuPageShell } from "../../../components/bahan-baku/page-shell";
 import { QualityPageHeading } from "../../../components/jadwal-qc/page-heading";
 import { QualityTable } from "../../../components/jadwal-qc/quality-table";
+import { requireAdminPage } from "../../../lib/admin/authorization";
+import { listAdminQcSchedules } from "../../../lib/admin/qc-schedules";
 
-export default function LihatJadwalQcPage() {
+export const instant = false;
+
+export default async function LihatJadwalQcPage() {
+  const admin = await requireAdminPage();
+  const schedules = await listAdminQcSchedules(admin.id_admin);
+
   return (
     <BahanBakuPageShell
       breadcrumb="Admin / Jadwal QC / Lihat Jadwal"
@@ -15,7 +22,7 @@ export default function LihatJadwalQcPage() {
           title="Lihat Jadwal QC"
           description="Pilih jadwal pemeriksaan QC untuk melihat informasi lengkapnya."
         />
-        <QualityTable mode="view" />
+        <QualityTable mode="view" schedules={schedules} />
         <div className="relative z-10 mt-[18px]">
           <Link
             href="/menu-jadwal-qc"

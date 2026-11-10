@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
-import type { BahanBaku } from "./data";
+import { useState, type FormEvent } from "react";
+import type { AdminBahanBaku } from "./data";
 import { Button } from "../ui/button";
 
 const fieldClassName =
@@ -31,12 +31,51 @@ function EditField({
   );
 }
 
-export function BahanBakuEditForm({ material }: { material: BahanBaku }) {
+export function BahanBakuEditForm({
+  material,
+}: {
+  material: AdminBahanBaku;
+}) {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    router.push(`/bahan-baku/update/berhasil/${material.code}`);
+    setError(null);
+    setIsSubmitting(true);
+    const formData = new FormData(event.currentTarget);
+
+    try {
+      const response = await fetch(
+        `/api/admin/bahan-baku/${encodeURIComponent(material.code)}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.get("nama"),
+            unit: formData.get("satuan"),
+            stock: formData.get("stok"),
+            minimumStock: formData.get("stokMinimum"),
+          }),
+        },
+      );
+      const result: { error?: string } = await response.json();
+
+      if (!response.ok) {
+        setError(result.error ?? "Bahan baku tidak dapat diperbarui.");
+        return;
+      }
+
+      router.replace(
+        `/bahan-baku/update/berhasil/${encodeURIComponent(material.code)}`,
+      );
+      router.refresh();
+    } catch {
+      setError("Tidak dapat menghubungi server. Coba lagi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -63,6 +102,7 @@ export function BahanBakuEditForm({ material }: { material: BahanBaku }) {
             defaultValue={material.name}
             autoComplete="off"
             required
+            maxLength={100}
             className={fieldClassName}
           />
         </EditField>
@@ -87,10 +127,10 @@ export function BahanBakuEditForm({ material }: { material: BahanBaku }) {
               required
               className={`${fieldClassName} appearance-none pr-10`}
             >
-              <option value="kg">kg</option>
-              <option value="gram">gram</option>
-              <option value="liter">liter</option>
-              <option value="pcs">pcs</option>
+              <option value="kg">Kg</option>
+              <option value="gram">Gram</option>
+              <option value="liter">Liter</option>
+              <option value="pcs">Pcs</option>
             </select>
             <Image
               aria-hidden="true"
@@ -134,9 +174,10 @@ export function BahanBakuEditForm({ material }: { material: BahanBaku }) {
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <Button
           type="submit"
+          disabled={isSubmitting}
           className="h-11 rounded-[9px] px-[18px] text-[15px] md:text-[17px]"
         >
-          Simpan Perubahan
+          {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
         <Button
           type="button"
@@ -147,6 +188,11 @@ export function BahanBakuEditForm({ material }: { material: BahanBaku }) {
           Batal
         </Button>
       </div>
+      {error ? (
+        <p role="alert" className="mt-4 text-sm text-red-700">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }

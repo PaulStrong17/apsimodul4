@@ -1,7 +1,14 @@
 import { OwnerVerificationTable } from "../../../components/owner/verification";
 import { OwnerPageHeading, OwnerShell } from "../../../components/owner/owner-shell";
+import { requireOwnerPage } from "../../../lib/owner/authorization";
+import { listOwnerVerifications } from "../../../lib/owner/verification";
 
-export default function OwnerVerificationPage() {
+export const instant = false;
+
+export default async function OwnerVerificationPage() {
+  const owner = await requireOwnerPage();
+  const items = await listOwnerVerifications(owner.id_owner);
+
   return (
     <OwnerShell
       activeSection="verifikasi-jadwal"
@@ -13,7 +20,7 @@ export default function OwnerVerificationPage() {
           title="Verifikasi Jadwal"
           description="Tinjau jadwal yang menunggu verifikasi, lalu putuskan untuk menyetujui atau menolak."
         />
-        <OwnerVerificationTable />
+        <OwnerVerificationTable items={items} />
       </div>
     </OwnerShell>
   );

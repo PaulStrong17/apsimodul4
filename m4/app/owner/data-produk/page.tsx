@@ -1,8 +1,12 @@
-import { ownerProducts } from "../../../components/owner/data";
 import { OwnerReadOnlyTable } from "../../../components/owner/read-only";
 import { OwnerPageHeading, OwnerShell } from "../../../components/owner/owner-shell";
+import { listOwnerProducts } from "../../../lib/owner/read-only";
 
-export default function OwnerDataProdukPage() {
+export const instant = false;
+
+export default async function OwnerDataProdukPage() {
+  const products = await listOwnerProducts();
+
   return (
     <OwnerShell
       activeSection="data-produk"
@@ -14,7 +18,7 @@ export default function OwnerDataProdukPage() {
           title="Data Produk"
           description="Daftar produk hanya untuk dilihat. Klik Lihat untuk membuka rincian."
         />
-        <OwnerReadOnlyTable kind="data-produk" rows={ownerProducts} />
+        <OwnerReadOnlyTable kind="data-produk" rows={products} />
       </div>
     </OwnerShell>
   );

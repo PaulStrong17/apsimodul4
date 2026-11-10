@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { EmployeeQcShell } from "../../../../../components/karyawan-qc/employee-shell";
-import { getQualityResult } from "../../../../../components/karyawan-qc/data";
 import { QualityResultForm } from "../../../../../components/karyawan-qc/hasil-qc";
+import { requireKaryawanQcPage } from "../../../../../lib/karyawan-qc/authorization";
+import { getQcResult, getQcResultOptions } from "../../../../../lib/karyawan-qc/hasil-qc";
+
+export const instant = false;
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -18,7 +21,12 @@ export default function KaryawanQcResultEditPage({ params }: PageProps) {
 
 async function KaryawanQcResultEditContent({ params }: PageProps) {
   const { kode } = await params;
-  const result = getQualityResult(kode);
+  const karyawan = await requireKaryawanQcPage();
+  const [result, options] = await Promise.all([
+    getQcResult(karyawan.id_karyawanqc, kode),
+    getQcResultOptions(karyawan.id_karyawanqc),
+  ]);
+
   if (!result) notFound();
 
   return (
@@ -27,7 +35,7 @@ async function KaryawanQcResultEditContent({ params }: PageProps) {
       breadcrumb={`Hasil QC / Update / Edit ${result.code}`}
       backgroundImage="/images/karyawan-qc/background-hasil-qc.jpg"
     >
-      <QualityResultForm mode="edit" result={result} />
+      <QualityResultForm mode="edit" result={result} options={options} />
     </EmployeeQcShell>
   );
 }

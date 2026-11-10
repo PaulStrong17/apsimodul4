@@ -1,8 +1,12 @@
-import { ownerMaterials } from "../../../components/owner/data";
 import { OwnerReadOnlyTable } from "../../../components/owner/read-only";
 import { OwnerPageHeading, OwnerShell } from "../../../components/owner/owner-shell";
+import { listOwnerMaterials } from "../../../lib/owner/read-only";
 
-export default function OwnerBahanBakuPage() {
+export const instant = false;
+
+export default async function OwnerBahanBakuPage() {
+  const materials = await listOwnerMaterials();
+
   return (
     <OwnerShell
       activeSection="bahan-baku"
@@ -14,7 +18,7 @@ export default function OwnerBahanBakuPage() {
           title="Data Bahan Baku"
           description="Daftar bahan baku hanya untuk dilihat. Klik Lihat untuk membuka rincian."
         />
-        <OwnerReadOnlyTable kind="bahan-baku" rows={ownerMaterials} />
+        <OwnerReadOnlyTable kind="bahan-baku" rows={materials} />
       </div>
     </OwnerShell>
   );

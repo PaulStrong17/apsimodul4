@@ -1,15 +1,45 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { BahanBaku } from "./data";
+import { useState } from "react";
+import type { AdminBahanBaku } from "./data";
 import { Button } from "../ui/button";
 
 export function BahanBakuDeleteConfirmation({
   material,
 }: {
-  material: BahanBaku;
+  material: AdminBahanBaku;
 }) {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function handleDelete() {
+    setError(null);
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(
+        `/api/admin/bahan-baku/${encodeURIComponent(material.code)}`,
+        { method: "DELETE" },
+      );
+      const result: { error?: string } = await response.json();
+
+      if (!response.ok) {
+        setError(result.error ?? "Bahan baku tidak dapat dihapus.");
+        return;
+      }
+
+      router.replace(
+        `/bahan-baku/hapus/berhasil/${encodeURIComponent(material.code)}`,
+      );
+      router.refresh();
+    } catch {
+      setError("Tidak dapat menghubungi server. Coba lagi.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <section
@@ -45,14 +75,18 @@ export function BahanBakuDeleteConfirmation({
         <Button
           type="button"
           variant="danger"
-          onClick={() =>
-            router.push(`/bahan-baku/hapus/berhasil/${material.code}`)
-          }
+          onClick={handleDelete}
+          disabled={isDeleting}
           className="h-[46px] min-w-[150px] px-5 text-[16px] md:w-[220px] md:px-0 md:text-[17px]"
         >
-          Ya, Hapus
+          {isDeleting ? "Menghapus..." : "Ya, Hapus"}
         </Button>
       </div>
+      {error ? (
+        <p role="alert" className="absolute inset-x-4 bottom-3 text-center text-sm text-red-700">
+          {error}
+        </p>
+      ) : null}
     </section>
   );
 }

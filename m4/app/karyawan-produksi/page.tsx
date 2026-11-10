@@ -1,12 +1,21 @@
-import { productionReferences } from "../../components/karyawan-produksi/data";
+import { notFound } from "next/navigation";
 import {
   ProductionHeading,
   ProductionShell,
 } from "../../components/karyawan-produksi/production-shell";
 import { ProductionTable } from "../../components/karyawan-produksi/production-pages";
+import { requireKaryawanProduksiPage } from "../../lib/karyawan-produksi/authorization";
+import { getProductionReferenceData } from "../../lib/karyawan-produksi/reference";
 
-export default function KaryawanProduksiHomePage() {
-  const data = productionReferences["jadwal-produksi"];
+export const instant = false;
+
+export default async function KaryawanProduksiHomePage() {
+  const karyawan = await requireKaryawanProduksiPage();
+  const data = await getProductionReferenceData(
+    "jadwal-produksi",
+    karyawan.id_karyawanproduksi,
+  );
+  if (!data) notFound();
 
   return (
     <ProductionShell

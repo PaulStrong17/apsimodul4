@@ -1,16 +1,25 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAuthSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
 const roleDestinations: Record<string, string> = {
-  admin: "/admin",
+  admin: "/menu-bahan-baku",
   owner: "/owner",
   karyawan_produksi: "/karyawan-produksi",
   karyawan_qc: "/karyawan-qc",
 };
 
 function matchesPassword(storedPassword: string, submittedPassword: string) {
+  if (/^[0-9a-f]{32}$/i.test(storedPassword)) {
+    const storedHash = Buffer.from(storedPassword, "hex");
+    const submittedHash = createHash("md5")
+      .update(submittedPassword)
+      .digest();
+
+    return timingSafeEqual(storedHash, submittedHash);
+  }
+
   const stored = Buffer.from(storedPassword);
   const submitted = Buffer.from(submittedPassword);
   return (

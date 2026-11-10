@@ -3,22 +3,20 @@ import {
   productionSchedules,
 } from "../jadwal-produksi/data";
 
-export type InspectionType =
-  | "Pemeriksaan Bahan Baku"
-  | "Pemeriksaan Selama Proses"
-  | "Pemeriksaan Produk Akhir"
-  | "Pemeriksaan Kemasan";
-
-export type InspectionStatus = "Terjadwal" | "Berjalan" | "Selesai" | "Dibatalkan";
+export type InspectionStatus =
+  | "Direncanakan"
+  | "Terjadwal"
+  | "Selesai"
+  | "Dibatalkan";
 export type InspectionVerificationStatus =
-  | "Belum Terverifikasi"
+  | "Menunggu"
   | "Terverifikasi"
-  | "Perlu Revisi";
+  | "Ditolak";
 
 export type QualitySchedule = {
   code: string;
   inspectionDate: string;
-  type: InspectionType;
+  type: string;
   productionCode: string;
   qualityControlEmployee: string;
   productionEmployee: string;
@@ -28,34 +26,26 @@ export type QualitySchedule = {
   createdBy: string;
 };
 
-export const inspectionTypes: InspectionType[] = [
-  "Pemeriksaan Bahan Baku",
-  "Pemeriksaan Selama Proses",
-  "Pemeriksaan Produk Akhir",
-  "Pemeriksaan Kemasan",
-];
-
 export const inspectionStatuses: InspectionStatus[] = [
+  "Direncanakan",
   "Terjadwal",
-  "Berjalan",
   "Selesai",
   "Dibatalkan",
 ];
 
 export const inspectionVerificationStatuses: InspectionVerificationStatus[] = [
-  "Belum Terverifikasi",
+  "Menunggu",
   "Terverifikasi",
-  "Perlu Revisi",
+  "Ditolak",
 ];
 
-export const qualityControlEmployees = ["Rizki Dinu", "Aisyah Dwina"];
-
+// Kept for owner/karyawan-produksi read-only views (static data)
 export const qualitySchedules: QualitySchedule[] = [
   {
-    code: "JQ-001",
+    code: "JQ001",
     inspectionDate: "2026-10-22",
     type: "Pemeriksaan Bahan Baku",
-    productionCode: "JP-001",
+    productionCode: "JP001",
     qualityControlEmployee: "Rizki Dinu",
     productionEmployee: "Raffa Fahrezy",
     status: "Selesai",
@@ -64,10 +54,10 @@ export const qualitySchedules: QualitySchedule[] = [
     createdBy: "Admin",
   },
   {
-    code: "JQ-002",
+    code: "JQ002",
     inspectionDate: "2026-10-23",
     type: "Pemeriksaan Selama Proses",
-    productionCode: "JP-002",
+    productionCode: "JP002",
     qualityControlEmployee: "Rizki Dinu",
     productionEmployee: "Handika Kurniawan",
     status: "Selesai",
@@ -76,38 +66,14 @@ export const qualitySchedules: QualitySchedule[] = [
     createdBy: "Admin",
   },
   {
-    code: "JQ-003",
+    code: "JQ003",
     inspectionDate: "2026-10-26",
     type: "Pemeriksaan Produk Akhir",
-    productionCode: "JP-003",
+    productionCode: "JP003",
     qualityControlEmployee: "Aisyah Dwina",
     productionEmployee: "Raffa Fahrezy",
     status: "Terjadwal",
-    verificationStatus: "Belum Terverifikasi",
-    owner: "Onang",
-    createdBy: "Admin",
-  },
-  {
-    code: "JQ-004",
-    inspectionDate: "2026-10-27",
-    type: "Pemeriksaan Kemasan",
-    productionCode: "JP-004",
-    qualityControlEmployee: "Aisyah Dwina",
-    productionEmployee: "Handika Kurniawan",
-    status: "Terjadwal",
-    verificationStatus: "Belum Terverifikasi",
-    owner: "Onang",
-    createdBy: "Admin",
-  },
-  {
-    code: "JQ-005",
-    inspectionDate: "2026-10-28",
-    type: "Pemeriksaan Produk Akhir",
-    productionCode: "JP-005",
-    qualityControlEmployee: "Rizki Dinu",
-    productionEmployee: "Raffa Fahrezy",
-    status: "Terjadwal",
-    verificationStatus: "Belum Terverifikasi",
+    verificationStatus: "Menunggu",
     owner: "Onang",
     createdBy: "Admin",
   },
@@ -115,12 +81,6 @@ export const qualitySchedules: QualitySchedule[] = [
 
 export function getQualitySchedule(code: string) {
   return qualitySchedules.find(
-    (schedule) => schedule.code.toLowerCase() === code.toLowerCase(),
-  );
-}
-
-export function getQualityProductionSchedule(code: string) {
-  return productionSchedules.find(
     (schedule) => schedule.code.toLowerCase() === code.toLowerCase(),
   );
 }
@@ -141,12 +101,10 @@ export function formatShortInspectionDate(date: string) {
 }
 
 export function getProductionScheduleLabel(schedule: QualitySchedule) {
-  const productionSchedule = getQualityProductionSchedule(
-    schedule.productionCode,
+  const productionSchedule = productionSchedules.find(
+    (s) => s.code.toLowerCase() === schedule.productionCode.toLowerCase(),
   );
   return productionSchedule
-    ? `${productionSchedule.code} · ${formatShortInspectionDate(
-        productionSchedule.productionDate,
-      )}`
+    ? `${productionSchedule.code} · ${formatShortInspectionDate(productionSchedule.productionDate)}`
     : schedule.productionCode;
 }

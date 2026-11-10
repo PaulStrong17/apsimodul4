@@ -4,7 +4,6 @@ import type { BahanBaku } from "../bahan-baku/data";
 import type { Product } from "../data-produk/data";
 import type { ProductionSchedule } from "../jadwal-produksi/data";
 import type { QualitySchedule } from "../jadwal-qc/data";
-import { formatRupiah } from "../bahan-baku/data";
 import { formatProductPrice } from "../data-produk/data";
 import {
   formatProductionDate,
@@ -31,7 +30,7 @@ export function OwnerReadOnlyTable({
   const definitions = {
     "bahan-baku": {
       title: "Data Bahan Baku",
-      columns: ["Kode", "Nama Bahan Baku", "Satuan", "Stok", "Stok Minimum", "Harga Satuan"],
+      columns: ["Kode", "Nama Bahan Baku", "Satuan", "Stok", "Stok Minimum"],
       getValues: (row: ReadOnlyRow) => {
         const material = row as BahanBaku;
         return [
@@ -40,7 +39,6 @@ export function OwnerReadOnlyTable({
           material.unit,
           material.stock,
           material.minimumStock,
-          formatRupiah(material.price),
         ];
       },
     },
@@ -224,22 +222,13 @@ export function OwnerReadOnlyDetail({
 }
 
 export function ownerMaterialDetailFields(material: BahanBaku): DetailField[] {
-  const detailStock =
-    "detailStock" in material && typeof material.detailStock === "number"
-      ? material.detailStock
-      : material.stock;
-
   return [
-    { label: "Satuan", value: `${material.stock} ${material.unit}` },
-    {
-      label: "Harga Satuan",
-      value: `${formatRupiah(material.price)} / ${material.unit}`,
-    },
-    { label: "Stok", value: `${detailStock} ${material.unit}` },
+    { label: "Satuan", value: material.unit },
+    { label: "Stok", value: `${material.stock} ${material.unit}` },
     {
       label: "Stok Minimum",
       value: `${material.minimumStock} ${material.unit}`,
     },
-    { label: "Keterangan", value: material.note || "Tidak ada keterangan." },
+    { label: "Dikelola Oleh", value: "Admin" },
   ];
 }

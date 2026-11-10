@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { BahanBakuPageShell } from "../../../components/bahan-baku/page-shell";
 import { ProductTable } from "../../../components/data-produk/product-table";
+import { listAdminProducts } from "../../../lib/admin/products";
+import { requireAdminPage } from "../../../lib/admin/authorization";
 
-export default function HapusProdukPage() {
+export const instant = false;
+
+export default async function HapusProdukPage() {
+  const admin = await requireAdminPage();
+  const products = await listAdminProducts(admin.id_admin);
+
   return (
     <BahanBakuPageShell
       activeSection="data-produk"
@@ -18,7 +25,7 @@ export default function HapusProdukPage() {
             Pilih produk yang tidak digunakan dari daftar berikut.
           </p>
         </div>
-        <ProductTable mode="delete" />
+        <ProductTable mode="delete" products={products} />
         <Link
           href="/menu-data-produk"
           className="mt-5 inline-flex h-11 w-fit items-center justify-center rounded-[9px] border border-[#d6e3ed] bg-white/90 px-[18px] text-[15px] font-bold text-[#0a3d62] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62] md:text-[17px]"

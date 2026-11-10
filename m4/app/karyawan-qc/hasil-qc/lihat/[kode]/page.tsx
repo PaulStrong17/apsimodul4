@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { EmployeeQcHeading, EmployeeQcShell } from "../../../../../components/karyawan-qc/employee-shell";
-import { getQualityResult } from "../../../../../components/karyawan-qc/data";
 import { QualityResultDetails } from "../../../../../components/karyawan-qc/reference-data";
+import { requireKaryawanQcPage } from "../../../../../lib/karyawan-qc/authorization";
+import { getQcResult } from "../../../../../lib/karyawan-qc/hasil-qc";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -18,7 +19,8 @@ export default function KaryawanQcResultDetailPage({ params }: PageProps) {
 
 async function KaryawanQcResultDetailContent({ params }: PageProps) {
   const { kode } = await params;
-  const result = getQualityResult(kode);
+  const karyawan = await requireKaryawanQcPage();
+  const result = await getQcResult(karyawan.id_karyawanqc, kode);
   if (!result) notFound();
 
   return (

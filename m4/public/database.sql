@@ -422,16 +422,18 @@ BEGIN;
 
 -- Pengguna
 INSERT INTO Pengguna (id_pengguna, nama_lengkap, username, password, role, status_aktif, email_pengguna) VALUES
-('A01', 'Andi Pratama',  'andi.pratama',  md5('111111111'), 'Admin',             TRUE, 'andi.pratama@keripikcabe.co.id'),
-('A02', 'Hj. Rosmawati', 'rosmawati',     md5('2222222'),   'Owner',             TRUE, 'rosmawati@keripikcabe.co.id'),
-('A03', 'Budi Santoso',  'budi.santoso',  md5('333333'),    'Karyawan Produksi', TRUE, 'budi.santoso@keripikcabe.co.id'),
-('A04', 'Rina Maharani', 'rina.maharani', md5('4444444'),   'Karyawan QC',       TRUE, 'rina.maharani@keripikcabe.co.id');
+('A01', 'Aisyah Dwina Putri', 'aisyah', md5('2037'), 'Admin', TRUE, 'aisyah@keripikcabe.co.id'),
+('A02', 'Yaffiq Arsya Ghazali', 'arsya', md5('3001'), 'Owner', TRUE, 'arsya@keripikcabe.co.id'),
+('A03', 'M. Raffa Fahrezi', 'raffa', md5('1017'), 'Karyawan Produksi', TRUE, 'raffa@keripikcabe.co.id'),
+('A04', 'Rizky Dinu Putra', 'rizky', md5('2006'), 'Karyawan QC', TRUE, 'rizky@keripikcabe.co.id'),
+('A05', 'Handika Kurniawan', 'dika', md5('7001'), 'Karyawan Produksi', TRUE, 'dika@keripikcabe.co.id');
 
 -- Peran
 INSERT INTO Admin             (id_admin, id_pengguna)            VALUES ('AD01', 'A01');
 INSERT INTO Owner             (id_owner, id_pengguna)            VALUES ('OW01', 'A02');
 INSERT INTO Karyawan_Produksi (id_karyawanproduksi, id_pengguna) VALUES ('KP01', 'A03');
 INSERT INTO Karyawan_QC       (id_karyawanqc, id_pengguna)       VALUES ('KQ01', 'A04');
+INSERT INTO Karyawan_Produksi (id_karyawanproduksi, id_pengguna) VALUES ('KP02', 'A05');
 
 -- Laporan_Jenis
 INSERT INTO Laporan_Jenis (jenis_laporan, hasil_tindakanperbaikan, status_pencapaian) VALUES
@@ -734,5 +736,4 @@ INNER JOIN Permintaan_Produk pm ON pm.id_permintaan = jp.id_permintaan
 INNER JOIN Produk pr            ON pr.id_produk     = pm.id_produk
 GROUP BY pr.nama_produk
 ORDER BY total_target DESC;
-
 

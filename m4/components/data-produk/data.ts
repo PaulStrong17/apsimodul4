@@ -1,3 +1,11 @@
+export type AdminProduct = {
+  code: string;
+  name: string;
+  variation: string;
+  stock: number;
+  recipe: string;
+};
+
 export type Product = {
   code: string;
   name: string;
@@ -56,4 +64,8 @@ export function getProduct(code: string) {
 
 export function formatProductPrice(price: number) {
   return `Rp${price.toLocaleString("id-ID")}`;
+}
+
+export function formatProductStock(stock: number) {
+  return stock.toLocaleString("id-ID");
 }

@@ -1,5 +1,7 @@
 import Image from "next/image";
+import { Suspense } from "react";
 import { Sidebar } from "../navigation/sidebar";
+import { requireAdminPage } from "../../lib/admin/authorization";
 
 type BahanBakuPageShellProps = {
   breadcrumb: string;
@@ -14,12 +16,22 @@ type BahanBakuPageShellProps = {
   children: React.ReactNode;
 };
 
-export function BahanBakuPageShell({
+export function BahanBakuPageShell(props: BahanBakuPageShellProps) {
+  return (
+    <Suspense fallback={null}>
+      <AuthorizedBahanBakuPageShell {...props} />
+    </Suspense>
+  );
+}
+
+async function AuthorizedBahanBakuPageShell({
   breadcrumb,
   activeSection = "bahan-baku",
   backgroundImage = "/images/bahan-baku/background.png",
   children,
 }: BahanBakuPageShellProps) {
+  await requireAdminPage();
+
   return (
     <main className="flex min-h-svh flex-col md:flex-row">
       <Sidebar activeSection={activeSection} />

@@ -1,22 +1,19 @@
 import Link from "next/link";
-import {
-  formatInspectionDate,
-  getProductionScheduleLabel,
-  type QualitySchedule,
-} from "./data";
+import type { AdminQcSchedule } from "../../lib/admin/qc-schedules";
+import { formatInspectionDate } from "./data";
 
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <dt className="text-[14px] text-[#61738a] md:text-[16px]">{label}</dt>
       <dd className="text-[16px] font-bold leading-[1.4] text-[#17263b] md:text-[18px]">
-        {value}
+        {value || "—"}
       </dd>
     </div>
   );
 }
 
-export function QualityDetail({ schedule }: { schedule: QualitySchedule }) {
+export function QualityDetail({ schedule }: { schedule: AdminQcSchedule }) {
   return (
     <section className="relative z-10 w-full max-w-[900px] rounded-[14px] border border-[#d6e3ed] bg-white p-5 md:gap-7 md:p-6">
       <div>
@@ -30,11 +27,15 @@ export function QualityDetail({ schedule }: { schedule: QualitySchedule }) {
       <dl className="mt-5 grid grid-cols-1 gap-x-6 gap-y-5 border-t border-[#d6e3ed] pt-5 sm:grid-cols-2 md:mt-6 md:gap-y-6 md:pt-6">
         <DetailField
           label="Tanggal Pemeriksaan"
-          value={formatInspectionDate(schedule.inspectionDate)}
+          value={
+            schedule.inspectionDate
+              ? formatInspectionDate(schedule.inspectionDate)
+              : "—"
+          }
         />
         <DetailField
           label="Jadwal Produksi"
-          value={getProductionScheduleLabel(schedule)}
+          value={schedule.productionLabel}
         />
         <DetailField
           label="Karyawan QC"

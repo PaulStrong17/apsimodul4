@@ -1,8 +1,16 @@
+import Link from "next/link";
 import { BahanBakuPageShell } from "../../../components/bahan-baku/page-shell";
 import { SchedulePageHeading } from "../../../components/jadwal-produksi/page-heading";
 import { ScheduleTable } from "../../../components/jadwal-produksi/schedule-table";
+import { listAdminSchedules } from "../../../lib/admin/schedules";
+import { requireAdminPage } from "../../../lib/admin/authorization";
 
-export default function LihatJadwalProduksiPage() {
+export const instant = false;
+
+export default async function LihatJadwalProduksiPage() {
+  const admin = await requireAdminPage();
+  const schedules = await listAdminSchedules(admin.id_admin);
+
   return (
     <BahanBakuPageShell
       breadcrumb="Admin / Jadwal Produksi / Lihat Jadwal"
@@ -14,7 +22,15 @@ export default function LihatJadwalProduksiPage() {
           title="Lihat Jadwal Produksi"
           description="Pilih jadwal produksi untuk melihat informasi lengkapnya."
         />
-        <ScheduleTable mode="view" />
+        <ScheduleTable mode="view" schedules={schedules} />
+        <div className="relative z-10 mt-[18px]">
+          <Link
+            href="/menu-jadwal-produksi"
+            className="inline-flex min-h-11 items-center justify-center rounded-[9px] border border-[#d6e3ed] bg-white/85 px-[18px] font-bold text-[#0a3d62] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62]"
+          >
+            Kembali ke Menu Jadwal Produksi
+          </Link>
+        </div>
       </div>
     </BahanBakuPageShell>
   );

@@ -3,18 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { ActionCard } from "../ui/action-card";
 import { Button } from "../ui/button";
 import {
   getQualityResultDetails,
-  productionResultOptions,
-  qualityResults,
+  productionResultOptions as defaultProdOptions,
   referenceSections,
   type QualityResult,
 } from "./data";
 import { EmployeeQcHeading } from "./employee-shell";
 import { QualityResultsTable } from "./reference-data";
+import type { QcResultOptions } from "@/lib/karyawan-qc/hasil-qc";
 
 const resultActions = [
   {
@@ -63,25 +63,28 @@ export function QualityResultMenu() {
   );
 }
 
-export function QualityResultList({ mode }: { mode: "view" | "update" | "delete" }) {
+export function QualityResultList({
+  mode,
+  results,
+}: {
+  mode: "view" | "update" | "delete";
+  results?: QualityResult[];
+}) {
   const config = {
     view: {
       title: "Lihat Hasil QC",
       description:
         "Pilih hasil pemeriksaan QC untuk melihat informasi lengkapnya.",
-      breadcrumb: "Hasil QC / Lihat / Daftar",
     },
     update: {
       title: "Update Hasil QC",
       description:
         "Cari dan pilih hasil pemeriksaan, lalu klik Edit pada baris data yang ingin diperbarui.",
-      breadcrumb: "Hasil QC / Update / Daftar",
     },
     delete: {
       title: "Hapus Hasil QC",
       description:
         "Pilih data hasil pemeriksaan dari daftar sebelum melakukan penghapusan.",
-      breadcrumb: "Hasil QC / Hapus / Daftar",
     },
   }[mode];
 
@@ -91,7 +94,7 @@ export function QualityResultList({ mode }: { mode: "view" | "update" | "delete"
         title={config.title}
         description={config.description}
       />
-      <QualityResultsTable mode={mode} />
+      <QualityResultsTable mode={mode} results={results} />
       <Link
         href="/karyawan-qc/hasil-qc"
         className="relative z-10 mt-[18px] inline-flex h-10 w-fit items-center justify-center rounded-[8px] border border-[#d6e3ed] bg-white/90 px-[14px] font-bold text-[#0a3d62] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62]"
@@ -172,19 +175,37 @@ function ResultSelect({
 export function QualityResultForm({
   mode,
   result,
+  options,
 }: {
   mode: "create" | "edit";
   result?: QualityResult;
+  options?: QcResultOptions;
 }) {
   const router = useRouter();
   const editing = mode === "edit";
-  const scheduleOptions = referenceSections["jadwal-qc"].rows.map((row) => ({
-    value: row.code,
-    label: `${row.code} — ${row.title}`,
-  }));
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const scheduleOptions =
+    options?.qcSchedules ??
+    referenceSections["jadwal-qc"].rows.map((row) => ({
+      value: row.code,
+      label: `${row.code} — ${row.title}`,
+    }));
+
+  const prodResultOptions =
+    options?.productionResults.map((p) => ({
+      value: p.code,
+      label: p.label,
+    })) ??
+    defaultProdOptions.map((o) => ({
+      value: o.code,
+      label: o.label,
+    }));
+
   const detail = result ? getQualityResultDetails(result) : undefined;
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     if (!form.reportValidity()) return;
@@ -193,29 +214,64 @@ export function QualityResultForm({
     const inspected = Number(values.get("inspected"));
     const passed = Number(values.get("passed"));
     const rejected = Number(values.get("rejected"));
-    const rejectedInput = form.elements.namedItem("rejected");
-
-    if (!(rejectedInput instanceof HTMLInputElement)) {
-      throw new Error("The QC rejected-count input is missing.");
-    }
 
     if (passed + rejected !== inspected) {
-      rejectedInput.setCustomValidity(
-        "Jumlah lolos dan reject harus sama dengan jumlah yang diperiksa.",
-      );
-      rejectedInput.reportValidity();
-      rejectedInput.setCustomValidity("");
+      setError("Jumlah lolos dan reject harus sama dengan jumlah yang diperiksa.");
       return;
     }
 
-    const code = editing ? result?.code : `HQC-${String(qualityResults.length + 1).padStart(3, "0")}`;
-    if (!code) throw new Error("A QC result code is required.");
+    const code = editing
+      ? (result?.code ?? "")
+      : String(values.get("code") ?? "").trim().toUpperCase();
 
-    router.push(
-      editing
-        ? `/karyawan-qc/hasil-qc/update/berhasil/${encodeURIComponent(code)}`
-        : `/karyawan-qc/hasil-qc/tambah/berhasil/${encodeURIComponent(code)}`,
-    );
+    if (!code) {
+      setError("Kode hasil pemeriksaan QC diperlukan.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const body = {
+        code,
+        recordedAt: values.get("recordedAt"),
+        qcSchedule: values.get("qcSchedule"),
+        productionResult: values.get("productionResult"),
+        inspected,
+        passed,
+        rejected,
+        note: values.get("note"),
+        correctiveAction: values.get("correctiveAction"),
+      };
+
+      const url = editing
+        ? `/api/karyawan-qc/hasil-qc/${encodeURIComponent(code)}`
+        : "/api/karyawan-qc/hasil-qc";
+
+      const res = await fetch(url, {
+        method: editing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setError(data.error ?? "Terjadi kesalahan saat menyimpan data.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      router.replace(
+        editing
+          ? `/karyawan-qc/hasil-qc/update/berhasil/${encodeURIComponent(code)}`
+          : `/karyawan-qc/hasil-qc/tambah/berhasil/${encodeURIComponent(code)}`,
+      );
+      router.refresh();
+    } catch {
+      setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -242,7 +298,28 @@ export function QualityResultForm({
               : "Lengkapi hasil pemeriksaan. Kolom wajib ditandai dengan *."}
           </p>
 
+          {error && (
+            <div
+              role="alert"
+              className="mt-4 rounded-[9px] border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-700"
+            >
+              {error}
+            </div>
+          )}
+
           <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+            {!editing ? (
+              <ResultField label="Kode Hasil QC" htmlFor="code">
+                <input
+                  id="code"
+                  name="code"
+                  type="text"
+                  placeholder="Contoh: HQC-005"
+                  required
+                  className={fieldClassName}
+                />
+              </ResultField>
+            ) : null}
             <ResultField label="Jadwal QC" htmlFor="qc-schedule">
               <ResultSelect
                 id="qc-schedule"
@@ -257,16 +334,13 @@ export function QualityResultForm({
                 id="production-result"
                 name="productionResult"
                 placeholder="Pilih hasil produksi"
-                values={productionResultOptions.map((option) => ({
-                  value: option.code,
-                  label: option.label,
-                }))}
+                values={prodResultOptions}
                 defaultValue={result?.productionResultCode}
               />
             </ResultField>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-5 md:mt-[clamp(36px,10.5vw,150px)] md:grid-cols-2">
+          <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
             <ResultField label="Tanggal Pencatatan" htmlFor="recorded-at">
               <input
                 id="recorded-at"
@@ -346,9 +420,14 @@ export function QualityResultForm({
           <div className="mt-auto flex flex-wrap items-center gap-3 pt-5">
             <Button
               type="submit"
+              disabled={isSubmitting}
               className="h-11 px-[18px] text-[15px] md:text-[17px]"
             >
-              {editing ? "Simpan Perubahan" : "Simpan"}
+              {isSubmitting
+                ? "Menyimpan..."
+                : editing
+                  ? "Simpan Perubahan"
+                  : "Simpan"}
             </Button>
             <Link
               href="/karyawan-qc/hasil-qc"
@@ -368,6 +447,37 @@ export function QualityResultConfirmation({
 }: {
   code: string;
 }) {
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const res = await fetch(
+        `/api/karyawan-qc/hasil-qc/${encodeURIComponent(code)}`,
+        { method: "DELETE" },
+      );
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setError(data.error ?? "Terjadi kesalahan saat menghapus data.");
+        setIsDeleting(false);
+        return;
+      }
+
+      router.replace(
+        `/karyawan-qc/hasil-qc/hapus/berhasil/${encodeURIComponent(code)}`,
+      );
+      router.refresh();
+    } catch {
+      setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <div className="relative flex flex-1 flex-col p-[clamp(20px,2.5vw,36px)]">
       <EmployeeQcHeading
@@ -393,6 +503,16 @@ export function QualityResultConfirmation({
         <p className="mt-2 text-[14px] text-[#61738a]">
           Data yang dihapus tidak dapat dikembalikan.
         </p>
+
+        {error && (
+          <div
+            role="alert"
+            className="mt-4 rounded-[9px] border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-700"
+          >
+            {error}
+          </div>
+        )}
+
         <div className="mt-5 flex w-full flex-wrap justify-center gap-3">
           <Link
             href="/karyawan-qc/hasil-qc/hapus"
@@ -400,12 +520,14 @@ export function QualityResultConfirmation({
           >
             Batal
           </Link>
-          <Link
-            href={`/karyawan-qc/hasil-qc/hapus/berhasil/${encodeURIComponent(code)}`}
-            className="inline-flex h-10 min-w-[128px] items-center justify-center rounded-[8px] bg-[#bd2926] px-4 font-bold text-white hover:bg-[#a3201d]"
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="inline-flex h-10 min-w-[128px] items-center justify-center rounded-[8px] bg-[#bd2926] px-4 font-bold text-white hover:bg-[#a3201d] disabled:opacity-60"
           >
-            Ya, Hapus
-          </Link>
+            {isDeleting ? "Menghapus..." : "Ya, Hapus"}
+          </button>
         </div>
       </section>
     </div>
@@ -423,21 +545,18 @@ export function QualityResultSuccess({
     added: {
       title: "Hasil QC Berhasil Ditambahkan!",
       message: `Hasil QC ${code} telah berhasil ditambahkan.`,
-      breadcrumb: "Hasil QC / Konfirmasi",
       heading: "Tambah Data Hasil QC",
       description: "Penyimpanan tambahan data hasil QC.",
     },
     updated: {
       title: "Hasil QC Berhasil Diperbarui!",
       message: `Hasil QC ${code} telah berhasil diperbarui.`,
-      breadcrumb: "Hasil QC / Konfirmasi",
       heading: "Edit Data Hasil QC",
       description: "Perbarui data hasil QC.",
     },
     deleted: {
       title: "Hasil QC Berhasil Dihapus!",
       message: `Hasil QC ${code} telah berhasil dihapus.`,
-      breadcrumb: "Hasil QC / Konfirmasi",
       heading: "Hapus Hasil QC",
       description: "Penghapusan data hasil QC.",
     },

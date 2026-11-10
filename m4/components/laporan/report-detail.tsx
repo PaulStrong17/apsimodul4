@@ -1,9 +1,9 @@
 import Link from "next/link";
+import type { AdminReport } from "../../lib/admin/reports";
 import {
   formatFullReportPeriod,
   formatRejectRate,
   formatReportNumber,
-  type ProductionReport,
 } from "./data";
 
 function DetailField({ label, value }: { label: string; value: string }) {
@@ -17,7 +17,7 @@ function DetailField({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ReportDetail({ report }: { report: ProductionReport }) {
+export function ReportDetail({ report }: { report: AdminReport }) {
   return (
     <section className="relative z-10 w-full max-w-[900px] rounded-[14px] border border-[#d6e3ed] bg-white p-5 md:gap-7 md:p-6">
       <div>
@@ -61,7 +61,7 @@ export function ReportDetail({ report }: { report: ProductionReport }) {
           Hasil Tindakan Perbaikan
         </h3>
         <p className="mt-2 text-[15px] leading-[1.5] text-[#17263b] md:text-[17px]">
-          {report.correctiveAction}
+          {report.correctiveAction || "—"}
         </p>
       </div>
       <Link

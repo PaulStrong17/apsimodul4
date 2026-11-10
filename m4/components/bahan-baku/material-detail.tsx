@@ -1,6 +1,5 @@
 import Link from "next/link";
-import type { BahanBaku } from "./data";
-import { formatRupiah } from "./data";
+import type { AdminBahanBaku } from "./data";
 
 function DetailValue({
   label,
@@ -19,7 +18,11 @@ function DetailValue({
   );
 }
 
-export function BahanBakuDetail({ material }: { material: BahanBaku }) {
+export function BahanBakuDetail({
+  material,
+}: {
+  material: AdminBahanBaku;
+}) {
   return (
     <div className="relative z-10 flex w-full flex-col gap-6">
       <div className="flex flex-col gap-[6px]">
@@ -47,10 +50,6 @@ export function BahanBakuDetail({ material }: { material: BahanBaku }) {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <DetailValue label="Satuan" value={material.unit} />
           <DetailValue
-            label="Harga Satuan"
-            value={`${formatRupiah(material.price)} / ${material.unit}`}
-          />
-          <DetailValue
             label="Stok"
             value={`${material.stock} ${material.unit}`}
           />
@@ -58,15 +57,6 @@ export function BahanBakuDetail({ material }: { material: BahanBaku }) {
             label="Stok Minimum"
             value={`${material.minimumStock} ${material.unit}`}
           />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <p className="text-[14px] text-[#61738a] md:text-[16px]">
-            Keterangan
-          </p>
-          <p className="text-[15px] leading-[1.5] text-[#17263b] md:text-[17px]">
-            {material.note || "Tidak ada keterangan."}
-          </p>
         </div>
 
         <Link

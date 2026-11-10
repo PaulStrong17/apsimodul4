@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import {
-  getProductionReference,
   isProductionSection,
   isProductionReferenceSection,
 } from "../../../components/karyawan-produksi/data";
@@ -13,6 +12,10 @@ import {
   ProductionInputForm,
   ProductionTable,
 } from "../../../components/karyawan-produksi/production-pages";
+import { requireKaryawanProduksiPage } from "../../../lib/karyawan-produksi/authorization";
+import { getProductionReferenceData } from "../../../lib/karyawan-produksi/reference";
+
+export const instant = false;
 
 type PageProps = {
   params: Promise<{ section: string }>;
@@ -29,6 +32,8 @@ export default function KaryawanProduksiSectionPage({ params }: PageProps) {
 async function KaryawanProduksiSectionContent({ params }: PageProps) {
   const { section } = await params;
   if (!isProductionSection(section)) notFound();
+
+  const karyawan = await requireKaryawanProduksiPage();
 
   if (section === "input-progress-produk" || section === "input-hasil-produksi") {
     const progressMode = section === "input-progress-produk";
@@ -54,7 +59,7 @@ async function KaryawanProduksiSectionContent({ params }: PageProps) {
   }
 
   if (!isProductionReferenceSection(section)) notFound();
-  const data = getProductionReference(section);
+  const data = await getProductionReferenceData(section, karyawan.id_karyawanproduksi);
   if (!data) notFound();
 
   return (

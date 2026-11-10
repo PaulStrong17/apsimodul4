@@ -1,27 +1,26 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
-import { getQualitySchedule } from "../../../../components/jadwal-qc/data";
 import { QualityForm } from "../../../../components/jadwal-qc/quality-form";
 import { QualityPageHeading } from "../../../../components/jadwal-qc/page-heading";
+import { requireAdminPage } from "../../../../lib/admin/authorization";
+import {
+  getAdminQcSchedule,
+  getAdminQcScheduleOptions,
+} from "../../../../lib/admin/qc-schedules";
 
 type PageProps = {
   params: Promise<{ kode: string }>;
 };
 
-export default function EditJadwalQcPage({ params }: PageProps) {
-  return (
-    <Suspense
-      fallback={<div className="min-h-svh bg-[#f6f9fc]" aria-busy="true" />}
-    >
-      <EditJadwalQcContent params={params} />
-    </Suspense>
-  );
-}
-
-async function EditJadwalQcContent({ params }: PageProps) {
+export default async function EditJadwalQcPage({ params }: PageProps) {
   const { kode } = await params;
-  const schedule = getQualitySchedule(kode);
+  const admin = await requireAdminPage();
+  const decodedKode = decodeURIComponent(kode);
+
+  const [schedule, options] = await Promise.all([
+    getAdminQcSchedule(admin.id_admin, decodedKode),
+    getAdminQcScheduleOptions(admin.id_admin),
+  ]);
 
   if (!schedule) notFound();
 
@@ -37,7 +36,7 @@ async function EditJadwalQcContent({ params }: PageProps) {
           description={`Data terpilih: ${schedule.code} — ${schedule.type}. Ubah informasi yang diperlukan, lalu simpan perubahan.`}
         />
         <div className="mt-7 md:mt-[clamp(28px,3.2vw,46px)]">
-          <QualityForm mode="edit" schedule={schedule} />
+          <QualityForm mode="edit" schedule={schedule} options={options} />
         </div>
       </div>
     </BahanBakuPageShell>

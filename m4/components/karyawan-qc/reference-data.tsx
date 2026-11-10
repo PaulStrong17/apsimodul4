@@ -129,16 +129,18 @@ function ReferenceRowView({
 
 export function QualityResultsTable({
   mode,
+  results = qualityResults,
 }: {
   mode: "view" | "update" | "delete";
+  results?: QualityResult[];
 }) {
   const actionText = mode === "view" ? "Lihat" : mode === "update" ? "Edit" : "";
   const actionHref = (code: string) =>
     mode === "view"
-      ? `/karyawan-qc/hasil-qc/lihat/${code}`
+      ? `/karyawan-qc/hasil-qc/lihat/${encodeURIComponent(code)}`
       : mode === "update"
-        ? `/karyawan-qc/hasil-qc/update/${code}`
-        : `/karyawan-qc/hasil-qc/hapus/konfirmasi/${code}`;
+        ? `/karyawan-qc/hasil-qc/update/${encodeURIComponent(code)}`
+        : `/karyawan-qc/hasil-qc/hapus/konfirmasi/${encodeURIComponent(code)}`;
 
   return (
     <section className="relative z-10 w-full overflow-hidden rounded-[14px] border border-[#d6e3ed] bg-white">
@@ -166,19 +168,30 @@ export function QualityResultsTable({
             </tr>
           </thead>
           <tbody>
-            {qualityResults.map((result) => (
-              <QualityResultRow
-                key={result.code}
-                result={result}
-                mode={mode}
-                href={actionHref(result.code)}
-                actionText={actionText}
-              />
-            ))}
+            {results.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={8}
+                  className="px-6 py-10 text-center text-[#61738a]"
+                >
+                  Belum ada data hasil pemeriksaan QC.
+                </td>
+              </tr>
+            ) : (
+              results.map((result) => (
+                <QualityResultRow
+                  key={result.code}
+                  result={result}
+                  mode={mode}
+                  href={actionHref(result.code)}
+                  actionText={actionText}
+                />
+              ))
+            )}
           </tbody>
         </table>
       </div>
-      <TableFooter count={qualityResults.length} label="hasil pemeriksaan" />
+      <TableFooter count={results.length} label="hasil pemeriksaan" />
     </section>
   );
 }

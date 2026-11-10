@@ -1,13 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
-import { bahanBakuData, formatRupiah } from "./data";
+import type { AdminBahanBaku } from "./data";
 
 type BahanBakuDataTableProps = {
-  action: "edit" | "delete";
+  action: "view" | "edit" | "delete";
+  materials: AdminBahanBaku[];
 };
 
-export function BahanBakuDataTable({ action }: BahanBakuDataTableProps) {
+export function BahanBakuDataTable({
+  action,
+  materials,
+}: BahanBakuDataTableProps) {
   const isEdit = action === "edit";
+  const isView = action === "view";
 
   return (
     <section className="relative z-10 w-full overflow-hidden rounded-[14px] border border-[#d6e3ed] bg-white">
@@ -19,21 +24,20 @@ export function BahanBakuDataTable({ action }: BahanBakuDataTableProps) {
         <table className="w-full min-w-[760px] border-collapse text-left text-[13px] text-[#17263b] md:text-[16px]">
           <thead className="h-[48px] bg-[#f6f9fc] font-bold">
             <tr>
-              <th className="w-[100px] px-4">Kode</th>
-              <th>Nama Bahan Baku</th>
-              <th className="w-[70px]">Satuan</th>
-              <th className="w-[80px]">Stok</th>
-              <th className="w-[110px]">
+              <th scope="col" className="w-[100px] px-4">Kode</th>
+              <th scope="col">Nama Bahan Baku</th>
+              <th scope="col" className="w-[70px]">Satuan</th>
+              <th scope="col" className="w-[80px]">Stok</th>
+              <th scope="col" className="w-[110px]">
                 Stok
                 <br />
                 Minimum
               </th>
-              <th className="w-[130px]">Harga Satuan</th>
-              <th className="w-[110px]">{isEdit ? "Aksi" : "Hapus"}</th>
+              <th scope="col" className="w-[110px]">{isView ? "Lihat" : isEdit ? "Aksi" : "Hapus"}</th>
             </tr>
           </thead>
           <tbody>
-            {bahanBakuData.map((material) => (
+            {materials.map((material) => (
               <tr
                 key={material.code}
                 className="h-[clamp(48px,4.72vw,68px)] border-t border-[#d6e3ed]"
@@ -43,11 +47,15 @@ export function BahanBakuDataTable({ action }: BahanBakuDataTableProps) {
                 <td>{material.unit}</td>
                 <td>{material.stock}</td>
                 <td>{material.minimumStock}</td>
-                <td className="whitespace-nowrap">
-                  {formatRupiah(material.price)}
-                </td>
                 <td>
-                  {isEdit ? (
+                  {isView ? (
+                    <Link
+                      href={`/bahan-baku/lihat/${material.code}`}
+                      className="inline-flex h-9 items-center justify-center rounded-[8px] border border-[#d6e3ed] bg-white px-3 font-bold text-[#0a3d62] transition-colors hover:bg-[#f6f9fc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62] md:h-11 md:px-[14px]"
+                    >
+                      Detail
+                    </Link>
+                  ) : isEdit ? (
                     <Link
                       href={`/bahan-baku/update/${material.code}`}
                       className="inline-flex h-9 items-center justify-center gap-2 rounded-[8px] border border-[#d6e3ed] bg-white px-3 font-bold text-[#0a3d62] transition-colors hover:bg-[#f6f9fc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a3d62] md:h-11 md:px-[14px]"
@@ -83,7 +91,7 @@ export function BahanBakuDataTable({ action }: BahanBakuDataTableProps) {
       </div>
 
       <div className="flex items-center justify-between border-t border-[#d6e3ed] px-4 py-[14px] text-[13px] text-[#61738a] md:px-6 md:text-[15px]">
-        <p>Menampilkan 1–6 dari 6 bahan baku</p>
+        <p>Menampilkan {materials.length} bahan baku</p>
         <p className="font-medium text-[#0a3d62]">Halaman 1 dari 1</p>
       </div>
     </section>
