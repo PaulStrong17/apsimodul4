@@ -30,7 +30,16 @@ export function OwnerReadOnlyTable({
   const definitions = {
     "bahan-baku": {
       title: "Data Bahan Baku",
-      columns: ["Kode", "Nama Bahan Baku", "Satuan", "Stok", "Stok Minimum"],
+      columns: [
+        "Kode",
+        "Nama Bahan Baku",
+        "Satuan",
+        "Stok",
+        "Stok Minimum",
+        "Resep Produk",
+        "Supplier",
+        "Tgl Terima",
+      ],
       getValues: (row: ReadOnlyRow) => {
         const material = row as BahanBaku;
         return [
@@ -39,6 +48,9 @@ export function OwnerReadOnlyTable({
           material.unit,
           material.stock,
           material.minimumStock,
+          material.recipeNames || "—",
+          material.lastSupplierName || "—",
+          material.lastReceiptDate || "—",
         ];
       },
     },

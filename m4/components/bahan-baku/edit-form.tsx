@@ -182,8 +182,8 @@ export function BahanBakuEditForm({
           />
         </EditField>
 
-        {/* ERD Resep (Detail_Resep) */}
-        <EditField id="recipe-id" label="Resep Produk (ERD Detail_Resep)">
+        {/* Resep */}
+        <EditField id="recipe-id" label="Resep Produk">
           <span className="relative block">
             <select
               id="recipe-id"
@@ -209,8 +209,8 @@ export function BahanBakuEditForm({
           </span>
         </EditField>
 
-        {/* ERD Supplier (Jenis_Supplier) */}
-        <EditField id="supplier-id" label="Supplier (ERD Jenis_Supplier)">
+        {/* Supplier */}
+        <EditField id="supplier-id" label="Supplier">
           <span className="relative block">
             <select
               id="supplier-id"
@@ -236,8 +236,8 @@ export function BahanBakuEditForm({
           </span>
         </EditField>
 
-        {/* ERD Penerimaan_Bahan_Baku (tanggal_terima) */}
-        <EditField id="receipt-date" label="Tanggal Penerimaan (ERD Penerimaan)">
+        {/* Penerimaan Bahan Baku */}
+        <EditField id="receipt-date" label="Tanggal Penerimaan">
           <input
             id="receipt-date"
             name="receiptDate"

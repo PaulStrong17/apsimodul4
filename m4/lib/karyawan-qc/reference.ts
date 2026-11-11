@@ -19,11 +19,43 @@ export async function getReferenceSectionData(
   if (section === "bahan-baku") {
     const materials = await prisma.bahan_baku.findMany({
       orderBy: { id_bahan: "asc" },
+      include: {
+        detail_resep: {
+          include: {
+            resep: {
+              include: { produk: true },
+            },
+          },
+        },
+        penerimaan_bahan_baku: {
+          orderBy: { tanggal_terima: "desc" },
+          include: {
+            jenis_supplier: true,
+          },
+        },
+      },
     });
 
     const rows: ReferenceRow[] = materials.map((m) => {
       const stockNum = Number(m.stok);
       const minStockNum = Number(m.stok_minimum);
+
+      const recipeNames =
+        m.detail_resep
+          .map((dr) =>
+            dr.resep?.produk
+              ? `${dr.resep.produk.nama_produk} (${dr.resep.produk.varian})`
+              : dr.id_resep,
+          )
+          .filter(Boolean)
+          .join(", ") || "—";
+
+      const latestReceipt = m.penerimaan_bahan_baku[0];
+      const supplierName = latestReceipt?.jenis_supplier?.nama_supplier || "—";
+      const receiptDate = latestReceipt?.tanggal_terima
+        ? formatDate(latestReceipt.tanggal_terima)
+        : "—";
+
       return {
         code: m.id_bahan,
         cells: [
@@ -32,12 +64,18 @@ export async function getReferenceSectionData(
           m.satuan,
           String(stockNum),
           String(minStockNum),
+          recipeNames,
+          supplierName,
+          receiptDate,
         ],
         title: m.nama_bahan,
         fields: [
           ["Satuan", m.satuan],
           ["Stok", `${stockNum} ${m.satuan}`],
           ["Stok Minimum", `${minStockNum} ${m.satuan}`],
+          ["Resep Produk", recipeNames],
+          ["Supplier", supplierName],
+          ["Tanggal Penerimaan", receiptDate],
           ["Dikelola Oleh", "Admin"],
         ],
       };
@@ -45,7 +83,7 @@ export async function getReferenceSectionData(
 
     return {
       title: "Daftar Bahan Baku",
-      description: "Lihat stok dan spesifikasi bahan baku.",
+      description: "Lihat stok, resep acuan, dan riwayat penerimaan bahan baku.",
       tableTitle: "Data Bahan Baku",
       columns: [
         "Kode",
@@ -53,6 +91,9 @@ export async function getReferenceSectionData(
         "Satuan",
         "Stok",
         "Stok Minimum",
+        "Resep Produk",
+        "Supplier",
+        "Tgl Terima",
       ],
       backgroundImage: "/images/karyawan-qc/background-bahan-baku.jpg",
       rows,

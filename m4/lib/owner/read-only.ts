@@ -22,17 +22,52 @@ export type OwnerDetailResponse = {
 export async function listOwnerMaterials() {
   const materials = await prisma.bahan_baku.findMany({
     orderBy: { id_bahan: "asc" },
+    include: {
+      detail_resep: {
+        include: {
+          resep: {
+            include: { produk: true },
+          },
+        },
+      },
+      penerimaan_bahan_baku: {
+        orderBy: { tanggal_terima: "desc" },
+        include: {
+          jenis_supplier: true,
+        },
+      },
+    },
   });
 
   return materials.map((m) => {
     const stockNum = Number(m.stok);
     const minStockNum = Number(m.stok_minimum);
+
+    const recipeNames =
+      m.detail_resep
+        .map((dr) =>
+          dr.resep?.produk
+            ? `${dr.resep.produk.nama_produk} (${dr.resep.produk.varian})`
+            : dr.id_resep,
+        )
+        .filter(Boolean)
+        .join(", ") || "—";
+
+    const latestReceipt = m.penerimaan_bahan_baku[0];
+    const lastSupplierName = latestReceipt?.jenis_supplier?.nama_supplier || "—";
+    const lastReceiptDate = latestReceipt?.tanggal_terima
+      ? formatDate(latestReceipt.tanggal_terima)
+      : "—";
+
     return {
       code: m.id_bahan,
       name: m.nama_bahan,
       unit: m.satuan,
       stock: stockNum,
       minimumStock: minStockNum,
+      recipeNames,
+      lastSupplierName,
+      lastReceiptDate,
       price: 0,
       note: "",
       detailStock: stockNum * 10,
@@ -129,11 +164,39 @@ export async function getOwnerReadOnlyDetail(
   if (section === "bahan-baku") {
     const material = await prisma.bahan_baku.findFirst({
       where: { id_bahan: { equals: decoded, mode: "insensitive" } },
+      include: {
+        detail_resep: {
+          include: {
+            resep: {
+              include: { produk: true },
+            },
+          },
+        },
+        penerimaan_bahan_baku: {
+          orderBy: { tanggal_terima: "desc" },
+          include: {
+            jenis_supplier: true,
+          },
+        },
+      },
     });
     if (!material) return null;
 
     const stockNum = Number(material.stok);
     const minStockNum = Number(material.stok_minimum);
+
+    const recipeList = material.detail_resep
+      .map((dr) => {
+        const prod = dr.resep?.produk;
+        return prod ? `${prod.nama_produk} (${prod.varian})` : dr.id_resep;
+      })
+      .filter(Boolean);
+
+    const latestReceipt = material.penerimaan_bahan_baku[0];
+    const supplierName = latestReceipt?.jenis_supplier?.nama_supplier || "—";
+    const receiptDate = latestReceipt?.tanggal_terima
+      ? formatDate(latestReceipt.tanggal_terima)
+      : "—";
 
     return {
       title: material.nama_bahan,
@@ -143,6 +206,12 @@ export async function getOwnerReadOnlyDetail(
         { label: "Satuan", value: material.satuan },
         { label: "Stok", value: `${stockNum} ${material.satuan}` },
         { label: "Stok Minimum", value: `${minStockNum} ${material.satuan}` },
+        {
+          label: "Resep Produk",
+          value: recipeList.length > 0 ? recipeList.join(", ") : "—",
+        },
+        { label: "Supplier", value: supplierName },
+        { label: "Tanggal Penerimaan", value: receiptDate },
         { label: "Dikelola Oleh", value: "Admin" },
       ],
     };

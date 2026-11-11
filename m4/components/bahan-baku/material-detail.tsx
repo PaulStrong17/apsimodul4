@@ -33,7 +33,7 @@ export function BahanBakuDetail({
           Detail Bahan Baku
         </h1>
         <p className="text-[14px] leading-[1.5] text-[#61738a] md:text-[17px]">
-          Informasi bahan baku beserta resep acuan, supplier, dan riwayat penerimaan sesuai ERD.
+          Informasi bahan baku beserta resep acuan, supplier, dan riwayat penerimaan.
         </p>
       </div>
 
@@ -69,15 +69,12 @@ export function BahanBakuDetail({
 
         <div className="h-px w-full bg-[#d6e3ed]" />
 
-        {/* Bagian Resep Produk (Detail_Resep & Resep) */}
+        {/* Bagian Resep Produk */}
         <div>
           <div className="flex items-center justify-between">
             <h3 className="text-[17px] font-bold text-[#17263b]">
               Resep & Produk Terkait
             </h3>
-            <span className="text-[13px] text-[#61738a]">
-              Tabel Relasi: Detail_Resep &amp; Resep
-            </span>
           </div>
 
           {recipes.length > 0 ? (
@@ -114,15 +111,12 @@ export function BahanBakuDetail({
 
         <div className="h-px w-full bg-[#d6e3ed]" />
 
-        {/* Bagian Supplier & Tanggal Penerimaan (Penerimaan_Bahan_Baku & Jenis_Supplier) */}
+        {/* Bagian Supplier & Tanggal Penerimaan */}
         <div>
           <div className="flex items-center justify-between">
             <h3 className="text-[17px] font-bold text-[#17263b]">
               Riwayat Penerimaan &amp; Data Supplier
             </h3>
-            <span className="text-[13px] text-[#61738a]">
-              Tabel Relasi: Penerimaan_Bahan_Baku &amp; Jenis_Supplier
-            </span>
           </div>
 
           {receipts.length > 0 ? (

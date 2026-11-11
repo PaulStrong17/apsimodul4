@@ -94,7 +94,7 @@ export function BahanBakuAddForm({
           Form Tambah Bahan Baku
         </h2>
         <p className="text-[13px] text-[#61738a] md:text-[14px]">
-          Lengkapi data bahan baku beserta resep acuan dan penerimaan supplier sesuai ERD.
+          Lengkapi data bahan baku beserta resep acuan dan penerimaan supplier.
         </p>
       </div>
 
@@ -179,8 +179,8 @@ export function BahanBakuAddForm({
           />
         </FormField>
 
-        {/* ERD Resep (Detail_Resep) */}
-        <FormField label="Resep Produk (ERD Detail_Resep)" htmlFor="recipe-id">
+        {/* Resep */}
+        <FormField label="Resep Produk" htmlFor="recipe-id">
           <span className="relative block">
             <select
               id="recipe-id"
@@ -206,8 +206,8 @@ export function BahanBakuAddForm({
           </span>
         </FormField>
 
-        {/* ERD Supplier (Jenis_Supplier & Nama_Supplier) */}
-        <FormField label="Supplier (ERD Jenis_Supplier)" htmlFor="supplier-id">
+        {/* Supplier */}
+        <FormField label="Supplier" htmlFor="supplier-id">
           <span className="relative block">
             <select
               id="supplier-id"
@@ -233,9 +233,9 @@ export function BahanBakuAddForm({
           </span>
         </FormField>
 
-        {/* ERD Penerimaan_Bahan_Baku (tanggal_terima) */}
+        {/* Penerimaan Bahan Baku */}
         <FormField
-          label="Tanggal Penerimaan (ERD Penerimaan)"
+          label="Tanggal Penerimaan"
           htmlFor="receipt-date"
         >
           <input
