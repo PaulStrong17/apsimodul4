@@ -81,7 +81,17 @@ export async function PUT(request: Request, { params }: RouteParams) {
     );
   }
 
-  const reportId = parsed.reportCode ? parseReportId(parsed.reportCode) : null;
+  const rawReportId = parsed.reportCode ? parseReportId(parsed.reportCode) : null;
+  let validReportId: number | null = null;
+  if (rawReportId !== null) {
+    const reportExists = await prisma.laporan.findUnique({
+      where: { id_laporan: rawReportId },
+      select: { id_laporan: true },
+    });
+    if (reportExists) {
+      validReportId = reportExists.id_laporan;
+    }
+  }
 
   try {
     const updated = await prisma.hasil_pemeriksaan_qc.update({
@@ -93,7 +103,8 @@ export async function PUT(request: Request, { params }: RouteParams) {
         jumlah_reject: parsed.rejected,
         keterangan: parsed.note,
         id_jadwalqc: parsed.qcScheduleCode,
-        id_laporan: reportId ?? undefined,
+        id_laporan: validReportId,
+        jenis_laporan: validReportId ? "Laporan Hasil QC" : null,
       },
     });
 

@@ -5,6 +5,8 @@ import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell
 import { getAdminMaterial } from "../../../../lib/admin/materials";
 import { requireAdminPage } from "../../../../lib/admin/authorization";
 
+export const instant = false;
+
 type PageProps = {
   params: Promise<{ kode: string }>;
 };

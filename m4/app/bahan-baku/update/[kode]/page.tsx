@@ -2,8 +2,10 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuEditForm } from "../../../../components/bahan-baku/edit-form";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
-import { getAdminMaterial } from "../../../../lib/admin/materials";
+import { getAdminMaterial, getAdminMaterialOptions } from "../../../../lib/admin/materials";
 import { requireAdminPage } from "../../../../lib/admin/authorization";
+
+export const instant = false;
 
 type PageProps = {
   params: Promise<{ kode: string }>;
@@ -20,7 +22,10 @@ export default function EditBahanBakuPage({ params }: PageProps) {
 async function EditBahanBakuContent({ params }: PageProps) {
   const { kode } = await params;
   const admin = await requireAdminPage();
-  const material = await getAdminMaterial(admin.id_admin, kode);
+  const [material, options] = await Promise.all([
+    getAdminMaterial(admin.id_admin, kode),
+    getAdminMaterialOptions(),
+  ]);
 
   if (!material) {
     notFound();
@@ -40,7 +45,7 @@ async function EditBahanBakuContent({ params }: PageProps) {
             yang diperlukan, lalu simpan perubahan.
           </p>
         </div>
-        <BahanBakuEditForm material={material} />
+        <BahanBakuEditForm material={material} options={options} />
       </div>
     </BahanBakuPageShell>
   );

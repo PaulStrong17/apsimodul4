@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import type { AdminBahanBaku } from "./data";
 import { Button } from "../ui/button";
+import type { MaterialFormOptions } from "@/lib/admin/materials";
 
 const fieldClassName =
-  "h-12 w-full rounded-[10px] border border-[#d9e3ed] bg-white px-[10px] text-[16px] leading-normal text-[#17263b] outline-none focus:border-[#0a3d62] focus:ring-2 focus:ring-[#0a3d62]/10 md:text-[17px]";
+  "h-12 w-full rounded-[10px] border border-[#d9e3ed] bg-white px-[10px] text-[15px] leading-normal text-[#17263b] outline-none focus:border-[#0a3d62] focus:ring-2 focus:ring-[#0a3d62]/10 md:text-[16px]";
 
 function EditField({
   id,
@@ -22,7 +23,7 @@ function EditField({
     <div className="flex min-w-0 flex-col gap-2">
       <label
         htmlFor={id}
-        className="text-[14px] font-bold leading-[1.2] text-[#17263b] md:text-[16px]"
+        className="text-[14px] font-bold leading-[1.2] text-[#17263b] md:text-[15px]"
       >
         {label}
       </label>
@@ -33,12 +34,20 @@ function EditField({
 
 export function BahanBakuEditForm({
   material,
+  options,
 }: {
   material: AdminBahanBaku;
+  options?: MaterialFormOptions;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const suppliers = options?.suppliers ?? [];
+  const recipes = options?.recipes ?? [];
+  const initialRecipeCode = material.recipes?.[0]?.recipeCode ?? "";
+  const initialSupplierCode = material.receipts?.[0]?.supplierCode ?? "";
+  const initialReceiptDate = material.receipts?.[0]?.receiptDate ?? "";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,6 +66,11 @@ export function BahanBakuEditForm({
             unit: formData.get("satuan"),
             stock: formData.get("stok"),
             minimumStock: formData.get("stokMinimum"),
+            recipeId: formData.get("recipeId") || undefined,
+            supplierId: formData.get("supplierId") || undefined,
+            receiptDate: formData.get("receiptDate") || undefined,
+            receiptAmount: formData.get("stok"),
+            receiptNote: formData.get("receiptNote") || undefined,
           }),
         },
       );
@@ -81,19 +95,18 @@ export function BahanBakuEditForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative z-10 w-full max-w-[900px] rounded-[30px] border border-[#d6e3ed] bg-[linear-gradient(90deg,rgba(0,0,0,0.05),rgba(0,0,0,0.05)),linear-gradient(90deg,rgba(255,255,255,0.26),rgba(255,255,255,0.26))] p-[18px] shadow-[0_3px_4px_rgba(0,0,0,0.35)] md:min-h-[621px] md:rounded-[clamp(38px,4.65vw,67px)] md:p-[23px]"
+      className="relative z-10 w-full max-w-[900px] rounded-[24px] border border-[#d6e3ed] bg-white/80 p-5 shadow-[0_3px_4px_rgba(0,0,0,0.15)] md:rounded-[36px] md:p-7"
     >
       <div className="flex flex-col gap-1">
         <h2 className="text-[18px] font-bold leading-[1.5] text-[#17263b] md:text-[20px]">
-          Form Data Bahan Baku
+          Form Edit Bahan Baku
         </h2>
-        <p className="text-[13px] leading-[1.5] text-[#61738a] md:text-[15px]">
-          Perbarui data {material.code} • {material.name}. Kolom wajib ditandai
-          dengan *.
+        <p className="text-[13px] text-[#61738a] md:text-[14px]">
+          Perbarui data {material.code} • {material.name} beserta resep dan riwayat penerimaan supplier.
         </p>
       </div>
 
-      <div className="mt-7 grid grid-cols-1 gap-x-6 gap-y-5 md:mt-[25px] md:grid-cols-2 md:gap-y-[24px]">
+      <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
         <EditField id="nama" label="Nama Bahan Baku *">
           <input
             id="nama"
@@ -114,7 +127,7 @@ export function BahanBakuEditForm({
             type="text"
             value={material.code}
             readOnly
-            className={fieldClassName}
+            className={`${fieldClassName} bg-[#f6f9fc] text-[#61738a]`}
           />
         </EditField>
 
@@ -169,13 +182,89 @@ export function BahanBakuEditForm({
           />
         </EditField>
 
+        {/* ERD Resep (Detail_Resep) */}
+        <EditField id="recipe-id" label="Resep Produk (ERD Detail_Resep)">
+          <span className="relative block">
+            <select
+              id="recipe-id"
+              name="recipeId"
+              defaultValue={initialRecipeCode}
+              className={`${fieldClassName} appearance-none pr-10 text-[#61738a]`}
+            >
+              <option value="">Pilih Resep Produk (Opsional)</option>
+              {recipes.map((r) => (
+                <option key={r.code} value={r.code}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+            <Image
+              aria-hidden="true"
+              alt=""
+              src="/images/bahan-baku/chevron-down.svg"
+              width={16}
+              height={16}
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+            />
+          </span>
+        </EditField>
+
+        {/* ERD Supplier (Jenis_Supplier) */}
+        <EditField id="supplier-id" label="Supplier (ERD Jenis_Supplier)">
+          <span className="relative block">
+            <select
+              id="supplier-id"
+              name="supplierId"
+              defaultValue={initialSupplierCode}
+              className={`${fieldClassName} appearance-none pr-10 text-[#61738a]`}
+            >
+              <option value="">Pilih Supplier (Opsional)</option>
+              {suppliers.map((s) => (
+                <option key={s.code} value={s.code}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            <Image
+              aria-hidden="true"
+              alt=""
+              src="/images/bahan-baku/chevron-down.svg"
+              width={16}
+              height={16}
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+            />
+          </span>
+        </EditField>
+
+        {/* ERD Penerimaan_Bahan_Baku (tanggal_terima) */}
+        <EditField id="receipt-date" label="Tanggal Penerimaan (ERD Penerimaan)">
+          <input
+            id="receipt-date"
+            name="receiptDate"
+            type="date"
+            defaultValue={initialReceiptDate}
+            className={fieldClassName}
+          />
+        </EditField>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      <div className="mt-5">
+        <EditField id="receipt-note" label="Keterangan Penerimaan (Opsional)">
+          <input
+            id="receipt-note"
+            name="receiptNote"
+            type="text"
+            placeholder="Keterangan kondisi penerimaan bahan baku"
+            className={fieldClassName}
+          />
+        </EditField>
+      </div>
+
+      <div className="mt-7 flex flex-wrap items-center gap-3">
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-11 rounded-[9px] px-[18px] text-[15px] md:text-[17px]"
+          className="h-11 rounded-[9px] px-[20px] text-[15px] font-bold md:text-[16px]"
         >
           {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
@@ -183,7 +272,7 @@ export function BahanBakuEditForm({
           type="button"
           variant="secondary"
           onClick={() => router.push("/bahan-baku/update")}
-          className="h-11 px-[18px] text-[15px] md:text-[17px]"
+          className="h-11 px-[18px] text-[15px] md:text-[16px]"
         >
           Batal
         </Button>

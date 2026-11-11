@@ -57,8 +57,7 @@ export async function POST(request: Request) {
   // Validasi jadwal QC
   const schedule = await prisma.jadwal_pemeriksaan_qc.findFirst({
     where: {
-      id_jadwalqc: parsed.qcScheduleCode,
-      id_karyawanqc: authorization.karyawanQcId,
+      id_jadwalqc: { equals: parsed.qcScheduleCode, mode: "insensitive" },
     },
     include: {
       jadwal_produksi: true,
@@ -67,12 +66,22 @@ export async function POST(request: Request) {
 
   if (!schedule) {
     return NextResponse.json(
-      { error: "Jadwal QC yang dipilih tidak valid atau bukan tugas Anda." },
+      { error: "Jadwal QC yang dipilih tidak valid." },
       { status: 400 },
     );
   }
 
-  const reportId = parsed.reportCode ? parseReportId(parsed.reportCode) : null;
+  const rawReportId = parsed.reportCode ? parseReportId(parsed.reportCode) : null;
+  let validReportId: number | null = null;
+  if (rawReportId !== null) {
+    const reportExists = await prisma.laporan.findUnique({
+      where: { id_laporan: rawReportId },
+      select: { id_laporan: true },
+    });
+    if (reportExists) {
+      validReportId = reportExists.id_laporan;
+    }
+  }
 
   try {
     const created = await prisma.hasil_pemeriksaan_qc.create({
@@ -85,15 +94,17 @@ export async function POST(request: Request) {
         keterangan: parsed.note,
         id_jadwalqc: schedule.id_jadwalqc,
         id_karyawanqc: authorization.karyawanQcId,
-        id_laporan: reportId ?? undefined,
-        jenis_laporan: schedule.jenis_pemeriksaan ?? "Laporan Hasil QC",
+        id_laporan: validReportId,
+        jenis_laporan: validReportId ? "Laporan Hasil QC" : null,
       },
     });
 
     // Hubungkan dengan hasil produksi jika ada
     if (parsed.productionResultCode) {
-      const prodResult = await prisma.hasil_produksi.findUnique({
-        where: { id_hasil: parsed.productionResultCode },
+      const prodResult = await prisma.hasil_produksi.findFirst({
+        where: {
+          id_hasil: { equals: parsed.productionResultCode, mode: "insensitive" },
+        },
         select: { id_hasil: true },
       });
       if (prodResult) {
@@ -107,23 +118,33 @@ export async function POST(request: Request) {
     }
 
     // Catat tindakan perbaikan jika ada
-    if (parsed.correctiveAction) {
+    if (parsed.correctiveAction && parsed.correctiveAction.trim()) {
       const tindakanCount = await prisma.tindakan_perbaikan.count();
-      const nextId = `TP${String(tindakanCount + 1).padStart(3, "0")}`;
+      let nextId = `TP${String(tindakanCount + 1).padStart(3, "0")}`;
+      let counter = tindakanCount + 1;
+      while (
+        await prisma.tindakan_perbaikan.findUnique({
+          where: { id_tindakan: nextId },
+        })
+      ) {
+        counter++;
+        nextId = `TP${String(counter).padStart(3, "0")}`;
+      }
 
       await prisma.tindakan_perbaikan.create({
         data: {
           id_tindakan: nextId,
           deskripsi_tindakan: parsed.note,
-          hasil_tindakan: parsed.correctiveAction,
+          hasil_tindakan: parsed.correctiveAction.trim(),
           tanggal_tindakan: parsed.recordedAt,
           status: "Direncanakan",
+          keterangan: parsed.note,
           id_hasilqc: created.id_hasilqc,
           id_owner: schedule.id_owner,
           id_karyawanqc: authorization.karyawanQcId,
           id_karyawanproduksi: schedule.id_karyawanproduksi,
-          id_laporan: reportId ?? undefined,
-          jenis_laporan: schedule.jenis_pemeriksaan ?? "Laporan Hasil QC",
+          id_laporan: validReportId,
+          jenis_laporan: validReportId ? "Laporan Hasil QC" : null,
         },
       });
     }

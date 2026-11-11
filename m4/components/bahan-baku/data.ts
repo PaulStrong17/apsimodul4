@@ -4,11 +4,39 @@ export type BahanBaku = {
   unit: string;
   stock: number;
   minimumStock: number;
-  price: number;
-  note: string;
+  price?: number;
+  note?: string;
+  recipeNames?: string;
+  lastSupplierName?: string;
+  lastReceiptDate?: string;
 };
 
-export type AdminBahanBaku = Omit<BahanBaku, "price" | "note">;
+export type AdminBahanBaku = {
+  code: string;
+  name: string;
+  unit: string;
+  stock: number;
+  minimumStock: number;
+  recipeNames?: string;
+  lastSupplierName?: string;
+  lastReceiptDate?: string;
+  recipes?: {
+    recipeCode: string;
+    recipeDesc: string;
+    productCode: string;
+    productName: string;
+    productVariant: string;
+  }[];
+  receipts?: {
+    id: string;
+    receiptDate: string;
+    amount: number;
+    supplierCode: string;
+    supplierName: string;
+    supplierType: string;
+    note: string;
+  }[];
+};
 
 export const bahanBakuData: BahanBaku[] = [
   {
