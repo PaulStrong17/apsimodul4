@@ -3,6 +3,8 @@ import { OwnerShell } from "../../../../components/owner/owner-shell";
 import { requireOwnerPage } from "../../../../lib/owner/authorization";
 import { getOwnerKpiData } from "../../../../lib/owner/reports";
 
+export const instant = false;
+
 export default async function OwnerDashboardPeriodPage() {
   const owner = await requireOwnerPage();
   const kpiData = await getOwnerKpiData(owner.id_owner);

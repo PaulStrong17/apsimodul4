@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
 import { ReportForm } from "../../../../components/laporan/report-form";
@@ -8,11 +9,21 @@ import {
   getAdminReportOptions,
 } from "../../../../lib/admin/reports";
 
+export const instant = false;
+
 type PageProps = {
   params: Promise<{ kode: string }>;
 };
 
-export default async function EditLaporanPage({ params }: PageProps) {
+export default function EditLaporanPage({ params }: PageProps) {
+  return (
+    <Suspense fallback={<div className="min-h-svh bg-[#f6f9fc]" aria-busy="true" />}>
+      <EditLaporanContent params={params} />
+    </Suspense>
+  );
+}
+
+async function EditLaporanContent({ params }: PageProps) {
   const { kode } = await params;
   const admin = await requireAdminPage();
   const decodedKode = decodeURIComponent(kode);

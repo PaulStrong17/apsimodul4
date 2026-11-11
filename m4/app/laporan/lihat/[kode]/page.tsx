@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
 import { ReportDetail } from "../../../../components/laporan/report-detail";
@@ -5,11 +6,21 @@ import { ReportPageHeading } from "../../../../components/laporan/page-heading";
 import { requireAdminPage } from "../../../../lib/admin/authorization";
 import { getAdminReport } from "../../../../lib/admin/reports";
 
+export const instant = false;
+
 type PageProps = {
   params: Promise<{ kode: string }>;
 };
 
-export default async function LihatDetailLaporanPage({ params }: PageProps) {
+export default function LihatDetailLaporanPage({ params }: PageProps) {
+  return (
+    <Suspense fallback={<div className="min-h-svh bg-[#f6f9fc]" aria-busy="true" />}>
+      <LihatDetailLaporanContent params={params} />
+    </Suspense>
+  );
+}
+
+async function LihatDetailLaporanContent({ params }: PageProps) {
   const { kode } = await params;
   const admin = await requireAdminPage();
   const report = await getAdminReport(admin.id_admin, decodeURIComponent(kode));

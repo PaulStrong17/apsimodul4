@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
 import { QualityForm } from "../../../../components/jadwal-qc/quality-form";
@@ -8,11 +9,21 @@ import {
   getAdminQcScheduleOptions,
 } from "../../../../lib/admin/qc-schedules";
 
+export const instant = false;
+
 type PageProps = {
   params: Promise<{ kode: string }>;
 };
 
-export default async function EditJadwalQcPage({ params }: PageProps) {
+export default function EditJadwalQcPage({ params }: PageProps) {
+  return (
+    <Suspense fallback={<div className="min-h-svh bg-[#f6f9fc]" aria-busy="true" />}>
+      <EditJadwalQcContent params={params} />
+    </Suspense>
+  );
+}
+
+async function EditJadwalQcContent({ params }: PageProps) {
   const { kode } = await params;
   const admin = await requireAdminPage();
   const decodedKode = decodeURIComponent(kode);

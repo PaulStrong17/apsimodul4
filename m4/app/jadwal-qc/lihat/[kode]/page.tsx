@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BahanBakuPageShell } from "../../../../components/bahan-baku/page-shell";
 import { QualityDetail } from "../../../../components/jadwal-qc/quality-detail";
@@ -5,11 +6,21 @@ import { QualityPageHeading } from "../../../../components/jadwal-qc/page-headin
 import { requireAdminPage } from "../../../../lib/admin/authorization";
 import { getAdminQcSchedule } from "../../../../lib/admin/qc-schedules";
 
+export const instant = false;
+
 type PageProps = {
   params: Promise<{ kode: string }>;
 };
 
-export default async function LihatDetailJadwalQcPage({ params }: PageProps) {
+export default function LihatDetailJadwalQcPage({ params }: PageProps) {
+  return (
+    <Suspense fallback={<div className="min-h-svh bg-[#f6f9fc]" aria-busy="true" />}>
+      <LihatDetailJadwalQcContent params={params} />
+    </Suspense>
+  );
+}
+
+async function LihatDetailJadwalQcContent({ params }: PageProps) {
   const { kode } = await params;
   const admin = await requireAdminPage();
   const schedule = await getAdminQcSchedule(
